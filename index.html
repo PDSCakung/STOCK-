@@ -64,7 +64,7 @@
                     <i class="fa-solid fa-chart-line text-red-500"></i><span>Dashboard</span>
                 </button>
                 <button onclick="switchTab('yard')" id="tab-yard" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
-                    <i class="fa-solid fa-border-all text-amber-400"></i><span>Denah Yard Map</span>
+                    <i class="fa-solid fa-border-all text-amber-400"></i><span>Denah Yard Map (1-190)</span>
                 </button>
                 <button onclick="switchTab('stock')" id="tab-stock" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
                     <i class="fa-solid fa-car-side"></i><span>Stok Unit</span>
@@ -112,13 +112,13 @@
             </div>
         </div>
 
-        <!-- VIEW 2: YARD MAP -->
+        <!-- VIEW 2: YARD MAP (SLOT 1 - 190) -->
         <div id="view-yard" class="tab-content hidden space-y-6">
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <h2 class="text-base font-bold text-slate-900 flex items-center space-x-2">
                         <i class="fa-solid fa-map-location-dot text-toyota-red"></i>
-                        <span>Denah Interaktif Slot Parkir Yard PDS</span>
+                        <span>Denah Interaktif Slot Parkir Yard PDS (Slot 1 - 190)</span>
                     </h2>
                     <p class="text-xs text-slate-500">Klik slot parkir terisi untuk melihat detail unit, nama sales, dan customer.</p>
                 </div>
@@ -130,7 +130,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="yardGridContainer"></div>
+            <div class="space-y-6" id="yardGridContainer"></div>
         </div>
 
         <!-- VIEW 3: STOCK LIST TABLE -->
@@ -333,8 +333,8 @@
                         <input type="text" id="addEngine" class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Slot Parkir</label>
-                        <input type="text" id="addSlot" required placeholder="Contoh: A-01" class="w-full text-xs p-2.5 border rounded-xl uppercase font-bold text-red-600">
+                        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Slot Parkir (1 - 190)</label>
+                        <input type="text" id="addSlot" required placeholder="Contoh: 15 atau Slot 15" class="w-full text-xs p-2.5 border rounded-xl uppercase font-bold text-red-600">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -414,9 +414,9 @@
 
         function seedMockFrontendData() {
             stockData = [
-                { VIN: "MHKSK12345678901", EngineNumber: "1NR-FE882", Model: "Kijang Innova Zenix Hybrid", Color: "Platinum White", ParkingSlot: "A-01", SalesName: "Budi Santoso", CustomerName: "PT Astra Sedaya", EntryDate: "2026-09-10T08:30", PDIStatus: "Ready Delivery" },
-                { VIN: "MHKSK98765432102", EngineNumber: "1GD-FTV991", Model: "Fortuner 2.8 GR Sport", Color: "Attitude Black", ParkingSlot: "A-02", SalesName: "Rian Hidayat", CustomerName: "Ahmad Dani", EntryDate: "2026-09-11T10:15", PDIStatus: "Proses PDI" },
-                { VIN: "MHKSK33445566703", EngineNumber: "2NR-VE102", Model: "Veloz 1.5 Q CVT", Color: "Silver Metallic", ParkingSlot: "B-05", SalesName: "Siti Rahma", CustomerName: "Siti Nurhaliza", EntryDate: "2026-09-12T14:00", PDIStatus: "Belum PDI" }
+                { VIN: "MHKSK12345678901", EngineNumber: "1NR-FE882", Model: "Kijang Innova Zenix Hybrid", Color: "Platinum White", ParkingSlot: "1", SalesName: "Budi Santoso", CustomerName: "PT Astra Sedaya", EntryDate: "2026-09-10T08:30", PDIStatus: "Ready Delivery" },
+                { VIN: "MHKSK98765432102", EngineNumber: "1GD-FTV991", Model: "Fortuner 2.8 GR Sport", Color: "Attitude Black", ParkingSlot: "15", SalesName: "Rian Hidayat", CustomerName: "Ahmad Dani", EntryDate: "2026-09-11T10:15", PDIStatus: "Proses PDI" },
+                { VIN: "MHKSK33445566703", EngineNumber: "2NR-VE102", Model: "Veloz 1.5 Q CVT", Color: "Silver Metallic", ParkingSlot: "85", SalesName: "Siti Rahma", CustomerName: "Siti Nurhaliza", EntryDate: "2026-09-12T14:00", PDIStatus: "Belum PDI" }
             ];
             renderStockTable();
             renderYardMap();
@@ -438,23 +438,36 @@
             const container = document.getElementById('yardGridContainer');
             if (!container) return;
 
-            const blocks = ['A', 'B', 'C', 'D'];
-            const slotsPerBlock = 10;
+            // Pengelompokan 190 slot parkir ke dalam beberapa area visual
+            const blocks = [
+                { name: 'AREA A (SLOT 1 - 40)', start: 1, end: 40 },
+                { name: 'AREA B (SLOT 41 - 80)', start: 41, end: 80 },
+                { name: 'AREA C (SLOT 81 - 120)', start: 81, end: 120 },
+                { name: 'AREA D (SLOT 121 - 160)', start: 121, end: 160 },
+                { name: 'AREA E (SLOT 161 - 190)', start: 161, end: 190 }
+            ];
+
             let html = '';
 
             blocks.forEach(block => {
                 html += `
                     <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                         <div class="flex justify-between items-center border-b pb-2">
-                            <h3 class="font-extrabold text-sm text-slate-800">BLOK ${block}</h3>
-                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">10 Slot</span>
+                            <h3 class="font-extrabold text-sm text-slate-800">${block.name}</h3>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">${block.end - block.start + 1} Slot</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-10 gap-2">
                 `;
 
-                for (let i = 1; i <= slotsPerBlock; i++) {
-                    const slotCode = `${block}-${i < 10 ? '0' + i : i}`;
-                    const unit = stockData.find(u => (u.ParkingSlot || u.parkingSlot || '').toUpperCase() === slotCode);
+                for (let i = block.start; i <= block.end; i++) {
+                    const slotNumStr = i.toString();
+                    const slotPadded = i.toString().padStart(3, '0');
+
+                    // Pencocokan nomor slot fleksibel (misal: "1", "001", "Slot 1", "S-1")
+                    const unit = stockData.find(u => {
+                        const s = (u.ParkingSlot || u.parkingSlot || '').toString().trim().toUpperCase();
+                        return s === slotNumStr || s === slotPadded || s === `SLOT ${slotNumStr}` || s === `SLOT-${slotNumStr}` || s === `S-${slotNumStr}`;
+                    });
 
                     if (unit) {
                         let statusBg = 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200';
@@ -463,10 +476,10 @@
                         else if (status === 'Proses PDI') statusBg = 'bg-blue-100 text-blue-900 border-blue-300 hover:bg-blue-200';
 
                         html += `
-                            <div onclick="showSlotDetail('${slotCode}')" class="p-2.5 rounded-xl border ${statusBg} cursor-pointer transition shadow-sm">
+                            <div onclick="showSlotDetail('${slotNumStr}')" class="p-2 rounded-xl border ${statusBg} cursor-pointer transition shadow-sm flex flex-col justify-between">
                                 <div class="flex justify-between items-center">
-                                    <span class="font-black text-xs">${slotCode}</span>
-                                    <i class="fa-solid fa-car text-xs"></i>
+                                    <span class="font-black text-xs">#${slotNumStr}</span>
+                                    <i class="fa-solid fa-car text-[10px]"></i>
                                 </div>
                                 <div class="text-[10px] font-bold truncate mt-1">${unit.Model || unit.model}</div>
                                 <div class="text-[9px] truncate opacity-75">${unit.CustomerName || unit.customerName || unit.SalesName || unit.salesName || '-'}</div>
@@ -474,9 +487,9 @@
                         `;
                     } else {
                         html += `
-                            <div class="p-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 text-slate-400 text-center">
-                                <span class="font-mono font-bold text-xs block">${slotCode}</span>
-                                <span class="text-[9px] uppercase font-semibold text-slate-400">Kosong</span>
+                            <div class="p-2 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 text-slate-400 text-center flex flex-col justify-center items-center">
+                                <span class="font-mono font-bold text-xs block">#${slotNumStr}</span>
+                                <span class="text-[8px] uppercase font-semibold text-slate-400">Kosong</span>
                             </div>
                         `;
                     }
@@ -492,10 +505,16 @@
         }
 
         function showSlotDetail(slotCode) {
-            const unit = stockData.find(u => (u.ParkingSlot || u.parkingSlot || '').toUpperCase() === slotCode);
+            const slotNumStr = slotCode.toString();
+            const slotPadded = slotNumStr.padStart(3, '0');
+            const unit = stockData.find(u => {
+                const s = (u.ParkingSlot || u.parkingSlot || '').toString().trim().toUpperCase();
+                return s === slotNumStr || s === slotPadded || s === `SLOT ${slotNumStr}` || s === `SLOT-${slotNumStr}` || s === `S-${slotNumStr}`;
+            });
+
             if (!unit) return;
             
-            alert(`[DETAIL UNIT YARD MAP]\n\nSlot Parkir: ${slotCode}\nVIN / No Rangka: ${unit.VIN || unit.vin}\nModel: ${unit.Model || unit.model}\nWarna: ${unit.Color || unit.color}\nSales: ${unit.SalesName || unit.salesName || '-'}\nCustomer: ${unit.CustomerName || unit.customerName || '-'}\nStatus PDI: ${unit.PDIStatus || unit.pdiStatus}`);
+            alert(`[DETAIL UNIT YARD MAP]\n\nSlot Parkir: Slot #${slotNumStr}\nVIN / No Rangka: ${unit.VIN || unit.vin}\nModel: ${unit.Model || unit.model}\nWarna: ${unit.Color || unit.color}\nSales: ${unit.SalesName || unit.salesName || '-'}\nCustomer: ${unit.CustomerName || unit.customerName || '-'}\nStatus PDI: ${unit.PDIStatus || unit.pdiStatus}`);
         }
 
         function renderStockTable() {
@@ -518,7 +537,7 @@
                     <td class="p-3.5 font-mono font-bold text-slate-900">${item.VIN || item.vin}</td>
                     <td class="p-3.5 font-bold">${item.Model || item.model}</td>
                     <td class="p-3.5">${item.Color || item.color}</td>
-                    <td class="p-3.5 font-bold text-red-600">${item.ParkingSlot || item.parkingSlot}</td>
+                    <td class="p-3.5 font-bold text-red-600">Slot #${item.ParkingSlot || item.parkingSlot}</td>
                     <td class="p-3.5 font-semibold text-slate-700">${item.SalesName || item.salesName || '-'}</td>
                     <td class="p-3.5 font-semibold text-slate-700">${item.CustomerName || item.customerName || '-'}</td>
                     <td class="p-3.5 text-xs">${item.EntryDate ? String(item.EntryDate).slice(0,10) : '-'}</td>
@@ -544,7 +563,7 @@
                 document.getElementById('infoOkkModel').textContent = unit.Model || unit.model;
                 document.getElementById('infoOkkSales').textContent = unit.SalesName || unit.salesName || '-';
                 document.getElementById('infoOkkCustomer').textContent = unit.CustomerName || unit.customerName || '-';
-                document.getElementById('infoOkkSlot').textContent = unit.ParkingSlot || unit.parkingSlot;
+                document.getElementById('infoOkkSlot').textContent = `Slot #${unit.ParkingSlot || unit.parkingSlot}`;
                 document.getElementById('okkUnitInfoBox').classList.remove('hidden');
             }
         }
@@ -589,7 +608,7 @@
                     engine: String(row['Engine'] || row['engine'] || row['No Mesin'] || '-').trim(),
                     model: String(row['Model'] || row['model'] || '-').trim(),
                     color: String(row['Color'] || row['color'] || row['Warna'] || '-').trim(),
-                    parkingSlot: String(row['ParkingSlot'] || row['parkingSlot'] || row['Slot'] || '-').trim().toUpperCase(),
+                    parkingSlot: String(row['ParkingSlot'] || row['parkingSlot'] || row['Slot'] || '-').trim(),
                     salesName: String(row['Sales'] || row['salesName'] || row['Nama Sales'] || '-').trim(),
                     customerName: String(row['Customer'] || row['customerName'] || row['Nama Customer'] || '-').trim(),
                     pdiStatus: String(row['Status'] || row['pdiStatus'] || 'Belum PDI').trim(),
@@ -615,7 +634,7 @@
                     <td class="p-2">${item.engine}</td>
                     <td class="p-2 font-semibold">${item.model}</td>
                     <td class="p-2">${item.color}</td>
-                    <td class="p-2 font-bold text-red-600">${item.parkingSlot}</td>
+                    <td class="p-2 font-bold text-red-600">Slot #${item.parkingSlot}</td>
                     <td class="p-2">${item.salesName}</td>
                     <td class="p-2">${item.customerName}</td>
                 </tr>
@@ -674,7 +693,7 @@
                     "No Mesin": "1NR-FE12345",
                     "Model": "Kijang Innova Zenix",
                     "Warna": "Attitude Black",
-                    "Slot": "A-05",
+                    "Slot": "1",
                     "Nama Sales": "Budi Santoso",
                     "Nama Customer": "PT Astra Sedaya",
                     "Status": "Belum PDI"
@@ -684,7 +703,7 @@
                     "No Mesin": "2NR-VE67890",
                     "Model": "Veloz 1.5 Q CVT",
                     "Warna": "Platinum White",
-                    "Slot": "B-02",
+                    "Slot": "45",
                     "Nama Sales": "Rian Hidayat",
                     "Nama Customer": "Ahmad Dani",
                     "Status": "Proses PDI"
@@ -709,7 +728,7 @@
                 engine: document.getElementById('addEngine').value,
                 model: document.getElementById('addModel').value,
                 color: document.getElementById('addColor').value,
-                parkingSlot: document.getElementById('addSlot').value.toUpperCase(),
+                parkingSlot: document.getElementById('addSlot').value.trim(),
                 salesName: document.getElementById('addSales').value,
                 customerName: document.getElementById('addCustomer').value,
                 pdiStatus: document.getElementById('addPdiStatus').value
