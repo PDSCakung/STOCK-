@@ -6,10 +6,6 @@
     <title>Toyota PDS Stock & Yard Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <!-- SheetJS Library for Excel Bulk Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
@@ -67,6 +63,9 @@
                 <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab py-3 px-3.5 border-b-2 border-toyota-red text-white flex items-center space-x-2 whitespace-nowrap">
                     <i class="fa-solid fa-chart-line text-red-500"></i><span>Dashboard</span>
                 </button>
+                <button onclick="switchTab('yard')" id="tab-yard" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-border-all text-amber-400"></i><span>Denah Yard Map</span>
+                </button>
                 <button onclick="switchTab('stock')" id="tab-stock" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
                     <i class="fa-solid fa-car-side"></i><span>Stok Unit</span>
                     <span id="badgeTotalStock" class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
@@ -113,7 +112,28 @@
             </div>
         </div>
 
-        <!-- VIEW 2: STOCK LIST TABLE -->
+        <!-- VIEW 2: YARD MAP -->
+        <div id="view-yard" class="tab-content hidden space-y-6">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-map-location-dot text-toyota-red"></i>
+                        <span>Denah Interaktif Slot Parkir Yard PDS</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">Klik slot parkir terisi untuk melihat detail unit, nama sales, dan customer.</p>
+                </div>
+                <div class="flex flex-wrap gap-3 text-xs font-semibold">
+                    <div class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-300"></span><span class="text-slate-600">Kosong</span></div>
+                    <div class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded bg-amber-400"></span><span class="text-slate-600">Belum PDI</span></div>
+                    <div class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded bg-blue-500"></span><span class="text-slate-600">Proses PDI</span></div>
+                    <div class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded bg-emerald-500"></span><span class="text-slate-600">Ready</span></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="yardGridContainer"></div>
+        </div>
+
+        <!-- VIEW 3: STOCK LIST TABLE -->
         <div id="view-stock" class="tab-content hidden space-y-4">
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
                 <div class="flex flex-1 gap-2 w-full">
@@ -158,7 +178,7 @@
             </div>
         </div>
 
-        <!-- VIEW 3: OKK -->
+        <!-- VIEW 4: OKK -->
         <div id="view-okk" class="tab-content hidden space-y-6">
             <div class="bg-gradient-to-r from-blue-900 via-slate-800 to-gray-900 rounded-2xl p-6 text-white shadow-lg border border-blue-800">
                 <h2 class="text-xl font-extrabold flex items-center space-x-2">
@@ -241,7 +261,7 @@
         </div>
     </main>
 
-    <!-- MODAL 1: BULK UPLOAD EXCEL -->
+    <!-- MODAL BULK UPLOAD EXCEL -->
     <div id="modalBulkUpload" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -291,7 +311,7 @@
         </div>
     </div>
 
-    <!-- MODAL 2: INPUT SINGLE UNIT -->
+    <!-- MODAL INPUT SINGLE UNIT -->
     <div id="modalAddUnit" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
@@ -353,39 +373,6 @@
         </div>
     </div>
 
-    <!-- MODAL 3: OKK PREVIEW PRINT -->
-    <div id="modalOKK" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
-            <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between print:hidden">
-                <h3 class="font-bold text-sm">Dokumen Preview OKK Resmi Daya Toyota</h3>
-                <div class="space-x-2">
-                    <button onclick="window.print()" class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold">Print Document</button>
-                    <button onclick="closeModal('modalOKK')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            </div>
-            <div id="printableOkkDocument" class="p-8 text-slate-900 font-sans text-xs bg-white space-y-4">
-                <div class="flex justify-between border-b-2 border-slate-900 pb-2">
-                    <div>
-                        <h1 class="font-extrabold text-sm">PT DAYA ADICIPTA SANDIKA</h1>
-                        <h2 class="font-bold text-xs">DAYA TOYOTA CAKUNG</h2>
-                        <p class="text-[10px]">JL. RAYA BEKASI KM 26.5 UJUNG MENTENG, CAKUNG</p>
-                    </div>
-                    <div class="text-right font-mono">
-                        <h2 class="font-extrabold text-base">ORDER KIRIM KENDARAAN</h2>
-                        <p>NOMOR : <strong id="previewOkkNo">DAS/OKK/20260906/0002</strong></p>
-                        <p>TANGGAL : <strong id="previewOkkDate">14 Sep 2026</strong></p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4 font-mono">
-                    <div>Tipe: <strong id="previewOkkModel"></strong></div>
-                    <div>Transporter: <strong id="previewOkkTransporter"></strong></div>
-                    <div>VIN: <strong id="previewOkkVin"></strong></div>
-                    <div>Tujuan: <strong id="previewOkkDestination"></strong></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
         let GAS_API_URL = localStorage.getItem('https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec') || '';
         let stockData = [];
@@ -405,7 +392,6 @@
 
         async function fetchSystemData() {
             if (!GAS_API_URL) {
-                console.log("GAS API URL Belum di-set, menggunakan mode Demo Offline.");
                 seedMockFrontendData();
                 return;
             }
@@ -416,6 +402,7 @@
                 if (json.status === 'success') {
                     stockData = json.stocks || [];
                     renderStockTable();
+                    renderYardMap();
                     populateOkkVinDropdown();
                     renderDashboard();
                 }
@@ -427,10 +414,12 @@
 
         function seedMockFrontendData() {
             stockData = [
-                { vin: "MHKSK12345678901", engine: "1NR-FE882", model: "Kijang Innova Zenix Hybrid", color: "Platinum White", parkingSlot: "A-01", SalesName: "Budi Santoso", CustomerName: "PT Astra Sedaya", entryDate: "2026-09-10T08:30", pdiStatus: "Ready Delivery" },
-                { vin: "MHKSK98765432102", engine: "1GD-FTV991", model: "Fortuner 2.8 GR Sport", color: "Attitude Black", parkingSlot: "A-02", SalesName: "Rian Hidayat", CustomerName: "Ahmad Dani", entryDate: "2026-09-11T10:15", pdiStatus: "Proses PDI" }
+                { VIN: "MHKSK12345678901", EngineNumber: "1NR-FE882", Model: "Kijang Innova Zenix Hybrid", Color: "Platinum White", ParkingSlot: "A-01", SalesName: "Budi Santoso", CustomerName: "PT Astra Sedaya", EntryDate: "2026-09-10T08:30", PDIStatus: "Ready Delivery" },
+                { VIN: "MHKSK98765432102", EngineNumber: "1GD-FTV991", Model: "Fortuner 2.8 GR Sport", Color: "Attitude Black", ParkingSlot: "A-02", SalesName: "Rian Hidayat", CustomerName: "Ahmad Dani", EntryDate: "2026-09-11T10:15", PDIStatus: "Proses PDI" },
+                { VIN: "MHKSK33445566703", EngineNumber: "2NR-VE102", Model: "Veloz 1.5 Q CVT", Color: "Silver Metallic", ParkingSlot: "B-05", SalesName: "Siti Rahma", CustomerName: "Siti Nurhaliza", EntryDate: "2026-09-12T14:00", PDIStatus: "Belum PDI" }
             ];
             renderStockTable();
+            renderYardMap();
             populateOkkVinDropdown();
             renderDashboard();
         }
@@ -441,6 +430,72 @@
             
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             document.getElementById(`tab-${tab}`).classList.add('border-toyota-red', 'text-white');
+
+            if (tab === 'yard') renderYardMap();
+        }
+
+        function renderYardMap() {
+            const container = document.getElementById('yardGridContainer');
+            if (!container) return;
+
+            const blocks = ['A', 'B', 'C', 'D'];
+            const slotsPerBlock = 10;
+            let html = '';
+
+            blocks.forEach(block => {
+                html += `
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="font-extrabold text-sm text-slate-800">BLOK ${block}</h3>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">10 Slot</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                `;
+
+                for (let i = 1; i <= slotsPerBlock; i++) {
+                    const slotCode = `${block}-${i < 10 ? '0' + i : i}`;
+                    const unit = stockData.find(u => (u.ParkingSlot || u.parkingSlot || '').toUpperCase() === slotCode);
+
+                    if (unit) {
+                        let statusBg = 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200';
+                        const status = unit.PDIStatus || unit.pdiStatus;
+                        if (status === 'Ready Delivery') statusBg = 'bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200';
+                        else if (status === 'Proses PDI') statusBg = 'bg-blue-100 text-blue-900 border-blue-300 hover:bg-blue-200';
+
+                        html += `
+                            <div onclick="showSlotDetail('${slotCode}')" class="p-2.5 rounded-xl border ${statusBg} cursor-pointer transition shadow-sm">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-black text-xs">${slotCode}</span>
+                                    <i class="fa-solid fa-car text-xs"></i>
+                                </div>
+                                <div class="text-[10px] font-bold truncate mt-1">${unit.Model || unit.model}</div>
+                                <div class="text-[9px] truncate opacity-75">${unit.CustomerName || unit.customerName || unit.SalesName || unit.salesName || '-'}</div>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="p-2.5 rounded-xl border border-dashed border-slate-200 bg-slate-50/60 text-slate-400 text-center">
+                                <span class="font-mono font-bold text-xs block">${slotCode}</span>
+                                <span class="text-[9px] uppercase font-semibold text-slate-400">Kosong</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function showSlotDetail(slotCode) {
+            const unit = stockData.find(u => (u.ParkingSlot || u.parkingSlot || '').toUpperCase() === slotCode);
+            if (!unit) return;
+            
+            alert(`[DETAIL UNIT YARD MAP]\n\nSlot Parkir: ${slotCode}\nVIN / No Rangka: ${unit.VIN || unit.vin}\nModel: ${unit.Model || unit.model}\nWarna: ${unit.Color || unit.color}\nSales: ${unit.SalesName || unit.salesName || '-'}\nCustomer: ${unit.CustomerName || unit.customerName || '-'}\nStatus PDI: ${unit.PDIStatus || unit.pdiStatus}`);
         }
 
         function renderStockTable() {
@@ -466,7 +521,7 @@
                     <td class="p-3.5 font-bold text-red-600">${item.ParkingSlot || item.parkingSlot}</td>
                     <td class="p-3.5 font-semibold text-slate-700">${item.SalesName || item.salesName || '-'}</td>
                     <td class="p-3.5 font-semibold text-slate-700">${item.CustomerName || item.customerName || '-'}</td>
-                    <td class="p-3.5 text-xs">${item.EntryDate ? item.EntryDate.slice(0,10) : '-'}</td>
+                    <td class="p-3.5 text-xs">${item.EntryDate ? String(item.EntryDate).slice(0,10) : '-'}</td>
                     <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${item.PDIStatus || item.pdiStatus}</span></td>
                     <td class="p-3.5 text-center">
                         <button onclick="openOKKForVin('${item.VIN || item.vin}')" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">OKK</button>
@@ -578,9 +633,9 @@
             btn.textContent = 'Uploading...';
 
             if (!GAS_API_URL) {
-                // Offline fallback mode
                 stockData = [...stockData, ...parsedBulkItems];
                 renderStockTable();
+                renderYardMap();
                 renderDashboard();
                 populateOkkVinDropdown();
                 alert(`[DEMO MODE] ${parsedBulkItems.length} unit berhasil ditambahkan ke memori lokal.`);
@@ -663,6 +718,7 @@
             if (!GAS_API_URL) {
                 stockData.push(newItem);
                 renderStockTable();
+                renderYardMap();
                 renderDashboard();
                 populateOkkVinDropdown();
                 closeModal('modalAddUnit');
