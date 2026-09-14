@@ -38,7 +38,7 @@
                     <div>
                         <h1 class="text-lg font-extrabold tracking-tight flex items-center space-x-2">
                             <span>DAYA TOYOTA</span>
-                            <span class="text-xs bg-red-600/30 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-semibold">PDS SYSTEM v3.5</span>
+                            <span class="text-xs bg-red-600/30 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-semibold">PDS SYSTEM v3.7</span>
                         </h1>
                         <p class="text-[11px] text-slate-400 font-medium">Pre-Delivery Service & Yard Stock Control</p>
                     </div>
@@ -120,7 +120,7 @@
                         <i class="fa-solid fa-map-location-dot text-toyota-red"></i>
                         <span>Denah Interaktif Slot Parkir Yard PDS (Slot 1 - 190)</span>
                     </h2>
-                    <p class="text-xs text-slate-500">Klik slot parkir terisi untuk melihat detail unit, nama sales, dan customer.</p>
+                    <p class="text-xs text-slate-500">Klik slot parkir terisi untuk melihat detail unit, tanggal masuk, nama sales, dan customer.</p>
                 </div>
                 <div class="flex flex-wrap gap-3 text-xs font-semibold">
                     <div class="flex items-center space-x-1.5"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-300"></span><span class="text-slate-600">Kosong</span></div>
@@ -143,7 +143,6 @@
                         <option value="Belum PDI">Belum PDI</option>
                         <option value="Proses PDI">Proses PDI</option>
                         <option value="Ready Delivery">Ready Delivery</option>
-                        <option value="Sudah Keluar">Sudah Keluar (History)</option>
                     </select>
                 </div>
                 <div class="flex items-center space-x-2 w-full md:w-auto">
@@ -267,9 +266,16 @@
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-base text-slate-800 flex items-center space-x-2">
                     <i class="fa-solid fa-file-excel text-emerald-600"></i>
-                    <span>Bulk Import Stok Unit via Excel / CSV</span>
+                    <span>Bulk Import Stok Unit via Excel / CSV (Smart Upsert)</span>
                 </h3>
                 <button onclick="closeModal('modalBulkUpload')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 p-3 rounded-xl text-xs text-blue-900 flex items-start space-x-2">
+                <i class="fa-solid fa-circle-info text-blue-600 mt-0.5"></i>
+                <div>
+                    <strong>Sistem Update Fleksibel:</strong> Anda bisa upload file berisi <b>No Rangka & Tipe Unit saja</b> untuk input awal. Jika dikemudian hari mengupload file berisi <b>Nama Sales & Customer</b> dengan No Rangka yang sama, sistem akan otomatis <b>menimpa/memperbarui</b> data tanpa membuat duplikat.
+                </div>
             </div>
 
             <div class="flex flex-col sm:flex-row justify-between items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -277,22 +283,27 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">Pilih File Excel (.xlsx / .xls / .csv)</label>
                     <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" onchange="handleFileSelect(event)" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
                 </div>
-                <button onclick="downloadExcelTemplate()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1 whitespace-nowrap">
-                    <i class="fa-solid fa-download"></i><span>Download Template Excel</span>
-                </button>
+                <div class="flex space-x-2">
+                    <button onclick="downloadExcelTemplate('basic')" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl flex items-center space-x-1 whitespace-nowrap">
+                        <i class="fa-solid fa-download"></i><span>Template Awal (VIN & Tipe)</span>
+                    </button>
+                    <button onclick="downloadExcelTemplate('full')" class="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold rounded-xl flex items-center space-x-1 whitespace-nowrap">
+                        <i class="fa-solid fa-download"></i><span>Template Lengkap</span>
+                    </button>
+                </div>
             </div>
 
             <div class="border rounded-xl overflow-hidden max-h-60 overflow-y-auto">
                 <table class="w-full text-left text-[11px] text-slate-600">
                     <thead class="bg-slate-800 text-white sticky top-0 font-bold uppercase">
                         <tr>
-                            <th class="p-2">VIN</th>
-                            <th class="p-2">No Mesin</th>
-                            <th class="p-2">Model</th>
-                            <th class="p-2">Warna</th>
+                            <th class="p-2">Status Aksi</th>
+                            <th class="p-2">No Rangka (VIN)</th>
+                            <th class="p-2">Tipe / Model</th>
                             <th class="p-2">Slot</th>
-                            <th class="p-2">Sales</th>
-                            <th class="p-2">Customer</th>
+                            <th class="p-2">Nama Sales</th>
+                            <th class="p-2">Nama Customer</th>
+                            <th class="p-2">Tgl Masuk</th>
                         </tr>
                     </thead>
                     <tbody id="excelPreviewTableBody" class="divide-y divide-slate-100">
@@ -305,24 +316,25 @@
                 <span id="bulkStatusText" class="text-xs font-bold text-slate-600">Total Parsed: 0 Unit</span>
                 <div class="space-x-2">
                     <button onclick="closeModal('modalBulkUpload')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Batal</button>
-                    <button onclick="submitBulkData()" id="btnSubmitBulk" disabled class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md">Upload ke System</button>
+                    <button onclick="submitBulkData()" id="btnSubmitBulk" disabled class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold shadow-md">Proses Upload ke System</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL INPUT SINGLE UNIT -->
+    <!-- MODAL INPUT / EDIT SINGLE UNIT -->
     <div id="modalAddUnit" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="font-bold text-base text-slate-800 flex items-center space-x-2">
                     <i class="fa-solid fa-car text-toyota-red"></i>
-                    <span>Form Input Unit Stok Baru</span>
+                    <span id="modalUnitTitle">Form Input / Edit Unit Stok</span>
                 </h3>
                 <button onclick="closeModal('modalAddUnit')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <form onsubmit="handleSingleAddUnit(event)" class="space-y-3">
+            <form onsubmit="handleSingleSaveUnit(event)" class="space-y-3">
+                <input type="hidden" id="editUnitVinKey" value="">
                 <div>
                     <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">VIN / No. Rangka</label>
                     <input type="text" id="addVin" required class="w-full text-xs p-2.5 border rounded-xl font-mono font-bold uppercase">
@@ -334,7 +346,7 @@
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Slot Parkir (1 - 190)</label>
-                        <input type="text" id="addSlot" required placeholder="Contoh: 15 atau Slot 15" class="w-full text-xs p-2.5 border rounded-xl uppercase font-bold text-red-600">
+                        <input type="text" id="addSlot" required placeholder="Contoh: 15" class="w-full text-xs p-2.5 border rounded-xl uppercase font-bold text-red-600">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
@@ -357,17 +369,23 @@
                         <input type="text" id="addCustomer" placeholder="Contoh: PT Astra / John Doe" class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Status PDI</label>
-                    <select id="addPdiStatus" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50">
-                        <option value="Belum PDI">Belum PDI</option>
-                        <option value="Proses PDI">Proses PDI</option>
-                        <option value="Ready Delivery">Ready Delivery</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Tanggal Masuk</label>
+                        <input type="date" id="addEntryDate" required class="w-full text-xs p-2.5 border rounded-xl bg-slate-50 font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold uppercase text-slate-600 mb-1">Status PDI</label>
+                        <select id="addPdiStatus" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50">
+                            <option value="Belum PDI">Belum PDI</option>
+                            <option value="Proses PDI">Proses PDI</option>
+                            <option value="Ready Delivery">Ready Delivery</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="flex justify-end space-x-2 pt-3">
                     <button type="button" onclick="closeModal('modalAddUnit')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Batal</button>
-                    <button type="submit" class="px-5 py-2 bg-toyota-red text-white rounded-xl text-xs font-bold shadow-md">Simpan Unit</button>
+                    <button type="submit" class="px-5 py-2 bg-toyota-red text-white rounded-xl text-xs font-bold shadow-md">Simpan Data</button>
                 </div>
             </form>
         </div>
@@ -414,9 +432,9 @@
 
         function seedMockFrontendData() {
             stockData = [
-                { VIN: "MHKSK12345678901", EngineNumber: "1NR-FE882", Model: "Kijang Innova Zenix Hybrid", Color: "Platinum White", ParkingSlot: "1", SalesName: "Budi Santoso", CustomerName: "PT Astra Sedaya", EntryDate: "2026-09-10T08:30", PDIStatus: "Ready Delivery" },
-                { VIN: "MHKSK98765432102", EngineNumber: "1GD-FTV991", Model: "Fortuner 2.8 GR Sport", Color: "Attitude Black", ParkingSlot: "15", SalesName: "Rian Hidayat", CustomerName: "Ahmad Dani", EntryDate: "2026-09-11T10:15", PDIStatus: "Proses PDI" },
-                { VIN: "MHKSK33445566703", EngineNumber: "2NR-VE102", Model: "Veloz 1.5 Q CVT", Color: "Silver Metallic", ParkingSlot: "85", SalesName: "Siti Rahma", CustomerName: "Siti Nurhaliza", EntryDate: "2026-09-12T14:00", PDIStatus: "Belum PDI" }
+                { VIN: "MHKSK12345678901", EngineNumber: "1NR-FE882", Model: "Kijang Innova Zenix Hybrid", Color: "Platinum White", ParkingSlot: "1", SalesName: "Budi Santoso", CustomerName: "PT Astra Sedaya", EntryDate: "2026-09-10", PDIStatus: "Ready Delivery" },
+                { VIN: "MHKSK98765432102", EngineNumber: "1GD-FTV991", Model: "Fortuner 2.8 GR Sport", Color: "Attitude Black", ParkingSlot: "15", SalesName: "Rian Hidayat", CustomerName: "Ahmad Dani", EntryDate: "2026-09-11", PDIStatus: "Proses PDI" },
+                { VIN: "MHKSK33445566703", EngineNumber: "2NR-VE102", Model: "Veloz 1.5 Q CVT", Color: "Silver Metallic", ParkingSlot: "85", SalesName: "Siti Rahma", CustomerName: "Siti Nurhaliza", EntryDate: "2026-09-12", PDIStatus: "Belum PDI" }
             ];
             renderStockTable();
             renderYardMap();
@@ -438,7 +456,6 @@
             const container = document.getElementById('yardGridContainer');
             if (!container) return;
 
-            // Pengelompokan 190 slot parkir ke dalam beberapa area visual
             const blocks = [
                 { name: 'AREA A (SLOT 1 - 40)', start: 1, end: 40 },
                 { name: 'AREA B (SLOT 41 - 80)', start: 41, end: 80 },
@@ -463,7 +480,6 @@
                     const slotNumStr = i.toString();
                     const slotPadded = i.toString().padStart(3, '0');
 
-                    // Pencocokan nomor slot fleksibel (misal: "1", "001", "Slot 1", "S-1")
                     const unit = stockData.find(u => {
                         const s = (u.ParkingSlot || u.parkingSlot || '').toString().trim().toUpperCase();
                         return s === slotNumStr || s === slotPadded || s === `SLOT ${slotNumStr}` || s === `SLOT-${slotNumStr}` || s === `S-${slotNumStr}`;
@@ -514,7 +530,8 @@
 
             if (!unit) return;
             
-            alert(`[DETAIL UNIT YARD MAP]\n\nSlot Parkir: Slot #${slotNumStr}\nVIN / No Rangka: ${unit.VIN || unit.vin}\nModel: ${unit.Model || unit.model}\nWarna: ${unit.Color || unit.color}\nSales: ${unit.SalesName || unit.salesName || '-'}\nCustomer: ${unit.CustomerName || unit.customerName || '-'}\nStatus PDI: ${unit.PDIStatus || unit.pdiStatus}`);
+            const dateFormatted = unit.EntryDate || unit.entryDate ? String(unit.EntryDate || unit.entryDate).slice(0,10) : '-';
+            alert(`[DETAIL UNIT YARD MAP]\n\nSlot Parkir: Slot #${slotNumStr}\nVIN / No Rangka: ${unit.VIN || unit.vin}\nModel: ${unit.Model || unit.model}\nWarna: ${unit.Color || unit.color}\nTanggal Masuk: ${dateFormatted}\nSales: ${unit.SalesName || unit.salesName || '-'}\nCustomer: ${unit.CustomerName || unit.customerName || '-'}\nStatus PDI: ${unit.PDIStatus || unit.pdiStatus}`);
         }
 
         function renderStockTable() {
@@ -532,21 +549,27 @@
                 return matchSearch && matchFilter;
             });
 
-            tbody.innerHTML = filtered.map(item => `
+            tbody.innerHTML = filtered.map(item => {
+                const dateVal = item.EntryDate || item.entryDate;
+                const displayDate = dateVal ? String(dateVal).slice(0,10) : '-';
+
+                return `
                 <tr class="hover:bg-slate-50 border-b border-slate-100">
                     <td class="p-3.5 font-mono font-bold text-slate-900">${item.VIN || item.vin}</td>
                     <td class="p-3.5 font-bold">${item.Model || item.model}</td>
-                    <td class="p-3.5">${item.Color || item.color}</td>
-                    <td class="p-3.5 font-bold text-red-600">Slot #${item.ParkingSlot || item.parkingSlot}</td>
+                    <td class="p-3.5">${item.Color || item.color || '-'}</td>
+                    <td class="p-3.5 font-bold text-red-600">${item.ParkingSlot || item.parkingSlot ? 'Slot #' + (item.ParkingSlot || item.parkingSlot) : '-'}</td>
                     <td class="p-3.5 font-semibold text-slate-700">${item.SalesName || item.salesName || '-'}</td>
                     <td class="p-3.5 font-semibold text-slate-700">${item.CustomerName || item.customerName || '-'}</td>
-                    <td class="p-3.5 text-xs">${item.EntryDate ? String(item.EntryDate).slice(0,10) : '-'}</td>
-                    <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${item.PDIStatus || item.pdiStatus}</span></td>
-                    <td class="p-3.5 text-center">
-                        <button onclick="openOKKForVin('${item.VIN || item.vin}')" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700">OKK</button>
+                    <td class="p-3.5 text-xs font-mono font-bold text-slate-700">${displayDate}</td>
+                    <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${item.PDIStatus || item.pdiStatus || 'Belum PDI'}</span></td>
+                    <td class="p-3.5 text-center flex items-center justify-center space-x-1">
+                        <button onclick="openEditModal('${item.VIN || item.vin}')" class="px-2.5 py-1 bg-amber-500 text-white rounded-lg text-xs font-bold hover:bg-amber-600 shadow-sm" title="Edit Data Unit">Edit</button>
+                        <button onclick="openOKKForVin('${item.VIN || item.vin}')" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 shadow-sm">OKK</button>
                     </td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
             document.getElementById('badgeTotalStock').textContent = stockData.length;
         }
 
@@ -581,7 +604,7 @@
             document.getElementById('dashAllocated').textContent = stockData.filter(s => (s.CustomerName || s.customerName) && (s.CustomerName || s.customerName) !== '-').length;
         }
 
-        // --- BULK UPLOAD EXCEL HANDLER ---
+        // --- BULK UPLOAD EXCEL HANDLER WITH SMART UPSERT ---
         function openBulkUploadModal() {
             parsedBulkItems = [];
             document.getElementById('excelFileInput').value = '';
@@ -603,17 +626,37 @@
                 const worksheet = workbook.Sheets[firstSheetName];
                 const jsonRows = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
 
-                parsedBulkItems = jsonRows.map(row => ({
-                    vin: String(row['VIN'] || row['vin'] || row['No Rangka'] || '').trim().toUpperCase(),
-                    engine: String(row['Engine'] || row['engine'] || row['No Mesin'] || '-').trim(),
-                    model: String(row['Model'] || row['model'] || '-').trim(),
-                    color: String(row['Color'] || row['color'] || row['Warna'] || '-').trim(),
-                    parkingSlot: String(row['ParkingSlot'] || row['parkingSlot'] || row['Slot'] || '-').trim(),
-                    salesName: String(row['Sales'] || row['salesName'] || row['Nama Sales'] || '-').trim(),
-                    customerName: String(row['Customer'] || row['customerName'] || row['Nama Customer'] || '-').trim(),
-                    pdiStatus: String(row['Status'] || row['pdiStatus'] || 'Belum PDI').trim(),
-                    notes: 'Imported via Excel'
-                })).filter(item => item.vin !== '');
+                parsedBulkItems = jsonRows.map(row => {
+                    const vin = String(row['VIN'] || row['vin'] || row['No Rangka'] || row['NO RANGKA'] || '').trim().toUpperCase();
+                    if (!vin) return null;
+
+                    const rawModel = String(row['Model'] || row['model'] || row['Tipe Unit'] || row['Tipe'] || row['TIPE'] || '').trim();
+                    const rawSales = String(row['Sales'] || row['salesName'] || row['Nama Sales'] || row['NAMA SALES'] || '').trim();
+                    const rawCustomer = String(row['Customer'] || row['customerName'] || row['Nama Customer'] || row['NAMA CUSTOMER'] || '').trim();
+                    const rawSlot = String(row['ParkingSlot'] || row['parkingSlot'] || row['Slot'] || row['SLOT'] || '').trim();
+                    const rawColor = String(row['Color'] || row['color'] || row['Warna'] || row['WARNA'] || '').trim();
+                    const rawDate = String(row['EntryDate'] || row['entryDate'] || row['Tgl Masuk'] || row['Tanggal Masuk'] || '').trim();
+                    const rawEngine = String(row['Engine'] || row['engine'] || row['No Mesin'] || row['NO MESIN'] || '').trim();
+                    const rawStatus = String(row['Status'] || row['pdiStatus'] || row['Status PDI'] || '').trim();
+
+                    // Cek apakah VIN ini sudah ada di database lokal
+                    const existingUnit = stockData.find(u => (u.VIN || u.vin) === vin);
+                    const isUpdate = !!existingUnit;
+
+                    return {
+                        vin: vin,
+                        model: rawModel,
+                        salesName: rawSales,
+                        customerName: rawCustomer,
+                        parkingSlot: rawSlot,
+                        color: rawColor,
+                        entryDate: rawDate ? rawDate.slice(0, 10) : '',
+                        engine: rawEngine,
+                        pdiStatus: rawStatus,
+                        isUpdate: isUpdate,
+                        existingUnit: existingUnit
+                    };
+                }).filter(item => item !== null);
 
                 renderBulkPreview();
             };
@@ -623,24 +666,43 @@
         function renderBulkPreview() {
             const tbody = document.getElementById('excelPreviewTableBody');
             if (parsedBulkItems.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-red-500">Format Excel tidak cocok atau file kosong!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center p-4 text-red-500">Format Excel tidak cocok atau file kosong! Pastikan kolom "No Rangka" atau "VIN" ada.</td></tr>';
                 document.getElementById('btnSubmitBulk').disabled = true;
                 return;
             }
 
-            tbody.innerHTML = parsedBulkItems.map(item => `
-                <tr class="hover:bg-slate-50">
-                    <td class="p-2 font-mono font-bold">${item.vin}</td>
-                    <td class="p-2">${item.engine}</td>
-                    <td class="p-2 font-semibold">${item.model}</td>
-                    <td class="p-2">${item.color}</td>
-                    <td class="p-2 font-bold text-red-600">Slot #${item.parkingSlot}</td>
-                    <td class="p-2">${item.salesName}</td>
-                    <td class="p-2">${item.customerName}</td>
-                </tr>
-            `).join('');
+            let newCount = 0;
+            let updateCount = 0;
 
-            document.getElementById('bulkStatusText').textContent = `Total Parsed: ${parsedBulkItems.length} Unit Siap Upload`;
+            tbody.innerHTML = parsedBulkItems.map(item => {
+                let statusBadge = '';
+                if (item.isUpdate) {
+                    updateCount++;
+                    statusBadge = `<span class="bg-amber-100 text-amber-800 border border-amber-300 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-arrows-rotate mr-1"></i>UPDATE</span>`;
+                } else {
+                    newCount++;
+                    statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-plus mr-1"></i>BARU</span>`;
+                }
+
+                const displayModel = item.model || (item.existingUnit ? (item.existingUnit.Model || item.existingUnit.model) : '-');
+                const displaySales = item.salesName || (item.existingUnit ? (item.existingUnit.SalesName || item.existingUnit.salesName) : '-');
+                const displayCustomer = item.customerName || (item.existingUnit ? (item.existingUnit.CustomerName || item.existingUnit.customerName) : '-');
+                const displaySlot = item.parkingSlot || (item.existingUnit ? (item.existingUnit.ParkingSlot || item.existingUnit.parkingSlot) : '-');
+
+                return `
+                <tr class="hover:bg-slate-50 border-b border-slate-100">
+                    <td class="p-2">${statusBadge}</td>
+                    <td class="p-2 font-mono font-bold text-slate-900">${item.vin}</td>
+                    <td class="p-2 font-semibold">${displayModel}</td>
+                    <td class="p-2 font-bold text-red-600">${displaySlot !== '-' ? 'Slot #' + displaySlot : '-'}</td>
+                    <td class="p-2 ${item.salesName ? 'font-bold text-blue-700 bg-blue-50/50' : ''}">${displaySales}</td>
+                    <td class="p-2 ${item.customerName ? 'font-bold text-emerald-700 bg-emerald-50/50' : ''}">${displayCustomer}</td>
+                    <td class="p-2 text-xs font-mono">${item.entryDate || (item.existingUnit ? (item.existingUnit.EntryDate || item.existingUnit.entryDate) : '-')}</td>
+                </tr>
+                `;
+            }).join('');
+
+            document.getElementById('bulkStatusText').textContent = `Parsed: ${parsedBulkItems.length} Unit (${newCount} Data Baru, ${updateCount} Timpa/Update Data Existing)`;
             document.getElementById('btnSubmitBulk').disabled = false;
         }
 
@@ -649,16 +711,70 @@
 
             const btn = document.getElementById('btnSubmitBulk');
             btn.disabled = true;
-            btn.textContent = 'Uploading...';
+            btn.textContent = 'Memproses Smart Upsert...';
+
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            // Proses pembaruan ke dalam array lokal (Smart Merge / Upsert)
+            parsedBulkItems.forEach(newItem => {
+                const idx = stockData.findIndex(u => (u.VIN || u.vin) === newItem.vin);
+                if (idx !== -1) {
+                    // JIKA DATA SUDAH ADA: Timpa/Update field yang di-upload tanpa menghapus data yang tidak diisi
+                    const current = stockData[idx];
+                    stockData[idx] = {
+                        ...current,
+                        VIN: newItem.vin,
+                        vin: newItem.vin,
+                        Model: newItem.model || current.Model || current.model || '-',
+                        model: newItem.model || current.model || current.Model || '-',
+                        SalesName: newItem.salesName || current.SalesName || current.salesName || '-',
+                        salesName: newItem.salesName || current.salesName || current.SalesName || '-',
+                        CustomerName: newItem.customerName || current.CustomerName || current.customerName || '-',
+                        customerName: newItem.customerName || current.customerName || current.CustomerName || '-',
+                        ParkingSlot: newItem.parkingSlot || current.ParkingSlot || current.parkingSlot || '-',
+                        parkingSlot: newItem.parkingSlot || current.parkingSlot || current.ParkingSlot || '-',
+                        Color: newItem.color || current.Color || current.color || '-',
+                        color: newItem.color || current.color || current.Color || '-',
+                        EntryDate: newItem.entryDate || current.EntryDate || current.entryDate || todayStr,
+                        entryDate: newItem.entryDate || current.entryDate || current.EntryDate || todayStr,
+                        PDIStatus: newItem.pdiStatus || current.PDIStatus || current.pdiStatus || 'Belum PDI',
+                        pdiStatus: newItem.pdiStatus || current.pdiStatus || current.PDIStatus || 'Belum PDI'
+                    };
+                } else {
+                    // JIKA DATA BARU: Tambahkan sebagai record baru
+                    stockData.push({
+                        VIN: newItem.vin,
+                        vin: newItem.vin,
+                        Model: newItem.model || '-',
+                        model: newItem.model || '-',
+                        SalesName: newItem.salesName || '-',
+                        salesName: newItem.salesName || '-',
+                        CustomerName: newItem.customerName || '-',
+                        customerName: newItem.customerName || '-',
+                        ParkingSlot: newItem.parkingSlot || '-',
+                        parkingSlot: newItem.parkingSlot || '-',
+                        Color: newItem.color || '-',
+                        color: newItem.color || '-',
+                        EngineNumber: newItem.engine || '-',
+                        engine: newItem.engine || '-',
+                        EntryDate: newItem.entryDate || todayStr,
+                        entryDate: newItem.entryDate || todayStr,
+                        PDIStatus: newItem.pdiStatus || 'Belum PDI',
+                        pdiStatus: newItem.pdiStatus || 'Belum PDI'
+                    });
+                }
+            });
+
+            renderStockTable();
+            renderYardMap();
+            renderDashboard();
+            populateOkkVinDropdown();
 
             if (!GAS_API_URL) {
-                stockData = [...stockData, ...parsedBulkItems];
-                renderStockTable();
-                renderYardMap();
-                renderDashboard();
-                populateOkkVinDropdown();
-                alert(`[DEMO MODE] ${parsedBulkItems.length} unit berhasil ditambahkan ke memori lokal.`);
+                alert(`[BERHASIL] ${parsedBulkItems.length} data diproses. Data lama otomatis diperbarui/ditimpa dan data baru telah ditambahkan.`);
                 closeModal('modalBulkUpload');
+                btn.disabled = false;
+                btn.textContent = 'Proses Upload ke System';
                 return;
             }
 
@@ -666,64 +782,122 @@
                 const res = await fetch(GAS_API_URL, {
                     method: 'POST',
                     body: JSON.stringify({
-                        action: 'bulkAddStock',
+                        action: 'bulkUpsertStock',
                         payload: parsedBulkItems
                     })
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    alert(result.data.message);
+                    alert(result.data.message || "Data berhasil disinkronkan ke Cloud Google Sheets!");
                     closeModal('modalBulkUpload');
                     fetchSystemData();
                 } else {
-                    alert("Gagal: " + result.message);
+                    alert("Sistem lokal terupdate. Respons Cloud GAS: " + result.message);
+                    closeModal('modalBulkUpload');
                 }
             } catch (err) {
-                alert("Terjadi kesalahan jaringan: " + err.toString());
+                alert("Sistem lokal terupdate. Terjadi error jaringan ke GAS: " + err.toString());
+                closeModal('modalBulkUpload');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Upload ke System';
+                btn.textContent = 'Proses Upload ke System';
             }
         }
 
-        function downloadExcelTemplate() {
-            const templateData = [
-                {
-                    "VIN": "MHKSK990011223344",
-                    "No Mesin": "1NR-FE12345",
-                    "Model": "Kijang Innova Zenix",
-                    "Warna": "Attitude Black",
-                    "Slot": "1",
-                    "Nama Sales": "Budi Santoso",
-                    "Nama Customer": "PT Astra Sedaya",
-                    "Status": "Belum PDI"
-                },
-                {
-                    "VIN": "MHKSK556677889900",
-                    "No Mesin": "2NR-VE67890",
-                    "Model": "Veloz 1.5 Q CVT",
-                    "Warna": "Platinum White",
-                    "Slot": "45",
-                    "Nama Sales": "Rian Hidayat",
-                    "Nama Customer": "Ahmad Dani",
-                    "Status": "Proses PDI"
-                }
-            ];
+        function downloadExcelTemplate(type) {
+            let templateData = [];
+            let fileName = "";
+
+            if (type === 'basic') {
+                templateData = [
+                    { "No Rangka": "MHKSK990011223344", "Tipe Unit": "Kijang Innova Zenix Hybrid", "Slot": "1" },
+                    { "No Rangka": "MHKSK556677889900", "Tipe Unit": "Veloz 1.5 Q CVT", "Slot": "45" }
+                ];
+                fileName = "Template_Input_Awal_NoRangka_Tipe.xlsx";
+            } else {
+                templateData = [
+                    {
+                        "No Rangka": "MHKSK990011223344",
+                        "Tipe Unit": "Kijang Innova Zenix",
+                        "Nama Sales": "Budi Santoso",
+                        "Nama Customer": "PT Astra Sedaya",
+                        "Slot": "1",
+                        "Warna": "Attitude Black",
+                        "Tanggal Masuk": "2026-09-14",
+                        "Status PDI": "Belum PDI"
+                    },
+                    {
+                        "No Rangka": "MHKSK556677889900",
+                        "Tipe Unit": "Veloz 1.5 Q CVT",
+                        "Nama Sales": "Rian Hidayat",
+                        "Nama Customer": "Ahmad Dani",
+                        "Slot": "45",
+                        "Warna": "Platinum White",
+                        "Tanggal Masuk": "2026-09-14",
+                        "Status PDI": "Proses PDI"
+                    }
+                ];
+                fileName = "Template_Lengkap_Stok_Toyota_PDS.xlsx";
+            }
 
             const ws = XLSX.utils.json_to_sheet(templateData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Template_Stok");
-            XLSX.writeFile(wb, "Template_Bulk_Upload_Stok_Toyota_PDS.xlsx");
+            XLSX.writeFile(wb, fileName);
         }
 
-        // --- SINGLE UNIT ADD HANDLER ---
+        // --- SINGLE UNIT ADD & EDIT HANDLERS ---
         function openAddModal() {
+            document.getElementById('modalUnitTitle').textContent = 'Form Input Unit Stok Baru';
+            document.getElementById('editUnitVinKey').value = '';
+            document.getElementById('addVin').value = '';
+            document.getElementById('addVin').disabled = false;
+            document.getElementById('addEngine').value = '';
+            document.getElementById('addSlot').value = '';
+            document.getElementById('addModel').value = '';
+            document.getElementById('addColor').value = '';
+            document.getElementById('addSales').value = '';
+            document.getElementById('addCustomer').value = '';
+            document.getElementById('addPdiStatus').value = 'Belum PDI';
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('addEntryDate').value = today;
+
             document.getElementById('modalAddUnit').classList.remove('hidden');
         }
 
-        async function handleSingleAddUnit(e) {
+        function openEditModal(vin) {
+            const unit = stockData.find(u => (u.VIN || u.vin) === vin);
+            if (!unit) return;
+
+            document.getElementById('modalUnitTitle').textContent = 'Form Edit Data Unit Stok';
+            document.getElementById('editUnitVinKey').value = vin;
+            document.getElementById('addVin').value = unit.VIN || unit.vin;
+            document.getElementById('addVin').disabled = true;
+            document.getElementById('addEngine').value = unit.EngineNumber || unit.engineNumber || unit.engine || '';
+            document.getElementById('addSlot').value = unit.ParkingSlot || unit.parkingSlot || '';
+            document.getElementById('addModel').value = unit.Model || unit.model || '';
+            document.getElementById('addColor').value = unit.Color || unit.color || '';
+            document.getElementById('addSales').value = unit.SalesName || unit.salesName || '';
+            document.getElementById('addCustomer').value = unit.CustomerName || unit.customerName || '';
+            document.getElementById('addPdiStatus').value = unit.PDIStatus || unit.pdiStatus || 'Belum PDI';
+
+            let rawDate = unit.EntryDate || unit.entryDate || '';
+            if (rawDate && rawDate.length >= 10) {
+                rawDate = rawDate.slice(0, 10);
+            } else {
+                rawDate = new Date().toISOString().split('T')[0];
+            }
+            document.getElementById('addEntryDate').value = rawDate;
+
+            document.getElementById('modalAddUnit').classList.remove('hidden');
+        }
+
+        async function handleSingleSaveUnit(e) {
             e.preventDefault();
-            const newItem = {
+            const editVinKey = document.getElementById('editUnitVinKey').value;
+
+            const itemData = {
                 vin: document.getElementById('addVin').value.toUpperCase(),
                 engine: document.getElementById('addEngine').value,
                 model: document.getElementById('addModel').value,
@@ -731,35 +905,75 @@
                 parkingSlot: document.getElementById('addSlot').value.trim(),
                 salesName: document.getElementById('addSales').value,
                 customerName: document.getElementById('addCustomer').value,
-                pdiStatus: document.getElementById('addPdiStatus').value
+                pdiStatus: document.getElementById('addPdiStatus').value,
+                entryDate: document.getElementById('addEntryDate').value
             };
 
+            if (editVinKey) {
+                const idx = stockData.findIndex(u => (u.VIN || u.vin) === editVinKey);
+                if (idx !== -1) {
+                    stockData[idx] = {
+                        ...stockData[idx],
+                        VIN: itemData.vin,
+                        vin: itemData.vin,
+                        EngineNumber: itemData.engine,
+                        engine: itemData.engine,
+                        Model: itemData.model,
+                        model: itemData.model,
+                        Color: itemData.color,
+                        color: itemData.color,
+                        ParkingSlot: itemData.parkingSlot,
+                        parkingSlot: itemData.parkingSlot,
+                        SalesName: itemData.salesName,
+                        salesName: itemData.salesName,
+                        CustomerName: itemData.customerName,
+                        customerName: itemData.customerName,
+                        PDIStatus: itemData.pdiStatus,
+                        pdiStatus: itemData.pdiStatus,
+                        EntryDate: itemData.entryDate,
+                        entryDate: itemData.entryDate
+                    };
+                }
+            } else {
+                stockData.push({
+                    VIN: itemData.vin,
+                    EngineNumber: itemData.engine,
+                    Model: itemData.model,
+                    Color: itemData.color,
+                    ParkingSlot: itemData.parkingSlot,
+                    SalesName: itemData.salesName,
+                    CustomerName: itemData.customerName,
+                    PDIStatus: itemData.pdiStatus,
+                    EntryDate: itemData.entryDate
+                });
+            }
+
+            renderStockTable();
+            renderYardMap();
+            renderDashboard();
+            populateOkkVinDropdown();
+            closeModal('modalAddUnit');
+
             if (!GAS_API_URL) {
-                stockData.push(newItem);
-                renderStockTable();
-                renderYardMap();
-                renderDashboard();
-                populateOkkVinDropdown();
-                closeModal('modalAddUnit');
-                alert("Unit berhasil disimpan dalam mode lokal.");
+                alert(editVinKey ? "Data unit berhasil diperbarui (Lokal)!" : "Unit baru berhasil disimpan (Lokal)!");
                 return;
             }
 
             try {
+                const action = editVinKey ? 'updateStock' : 'addStock';
                 const res = await fetch(GAS_API_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addStock', payload: newItem })
+                    body: JSON.stringify({ action: action, payload: itemData })
                 });
                 const result = await res.json();
                 if (result.status === 'success') {
-                    alert("Unit berhasil disimpan!");
-                    closeModal('modalAddUnit');
+                    alert("Data berhasil tersimpan!");
                     fetchSystemData();
                 } else {
-                    alert("Gagal: " + result.message);
+                    alert("Simpan lokal berhasil, respons GAS: " + result.message);
                 }
             } catch (err) {
-                alert("Error: " + err.toString());
+                alert("Simpan lokal berhasil. Error koneksi GAS: " + err.toString());
             }
         }
 
