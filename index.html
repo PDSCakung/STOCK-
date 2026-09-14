@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toyota PDS Stock & Yard Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        toyota: { red: '#EB0A1E', dark: '#111827', gray: '#1F2937' }
+                    },
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 text-white shadow-xl sticky top-0 z-40 border-b border-red-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-toyota-red p-2 rounded-xl text-white shadow-md">
+                        <i class="fa-solid fa-car text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-extrabold tracking-tight flex items-center space-x-2">
+                            <span>DAYA TOYOTA</span>
+                            <span class="text-xs bg-red-600/30 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-semibold">PDS SYSTEM</span>
+                        </h1>
+                        <p class="text-[11px] text-slate-400 font-medium">Pre-Delivery Service & Yard Stock Control</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button onclick="openApiConfigModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold flex items-center space-x-1 border border-slate-700">
+                        <i class="fa-solid fa-cloud-bolt text-amber-400"></i>
+                        <span id="apiStatusText">GAS Cloud Connected</span>
+                    </button>
+                    <div class="text-right hidden sm:block">
+                        <div id="liveClock" class="text-xs font-mono font-bold text-slate-200">00:00:00 WIB</div>
+                        <div class="text-[10px] text-slate-400" id="liveDate">14 September 2026</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <div class="bg-slate-950 border-t border-slate-800 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-3 overflow-x-auto custom-scrollbar text-xs font-medium">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab py-3 px-3.5 border-b-2 border-toyota-red text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-chart-line text-red-500"></i><span>Dashboard</span>
+                </button>
+                <button onclick="switchTab('stock')" id="tab-stock" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-car-side"></i><span>Stok Unit</span>
+                    <span id="badgeTotalStock" class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="switchTab('yard')" id="tab-yard" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-square-parking"></i><span>Yard Map</span>
+                </button>
+                <button onclick="switchTab('opname')" id="tab-opname" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-qrcode text-amber-400"></i><span>Stock Opname & QR</span>
+                </button>
+                <button onclick="switchTab('okk')" id="tab-okk" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-signature text-blue-400"></i><span>Order Kirim (OKK)</span>
+                </button>
+                <button onclick="switchTab('reports')" id="tab-reports" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-file-invoice text-emerald-400"></i><span>Laporan & Export</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- VIEW 1: DASHBOARD -->
+        <div id="view-dashboard" class="tab-content space-y-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-red-100 text-toyota-red rounded-xl"><i class="fa-solid fa-car text-2xl"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase">Total In-Yard</div>
+                        <div class="text-2xl font-black text-slate-900" id="dashTotalInYard">0</div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-emerald-100 text-emerald-600 rounded-xl"><i class="fa-solid fa-circle-check text-2xl"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase">Ready Delivery</div>
+                        <div class="text-2xl font-black text-slate-900" id="dashReadyDelivery">0</div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-amber-100 text-amber-600 rounded-xl"><i class="fa-solid fa-screwdriver-wrench text-2xl"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase">Proses PDI</div>
+                        <div class="text-2xl font-black text-slate-900" id="dashProsesPdi">0</div>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><i class="fa-solid fa-truck-ramp-box text-2xl"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase">Terkirim (Month)</div>
+                        <div class="text-2xl font-black text-slate-900" id="dashHandoverMonth">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-4">Distribusi Unit Berdasarkan Model</h3>
+                    <div class="h-64"><canvas id="chartModel"></canvas></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-slate-800 text-sm mb-4">Status Progress PDI Yard</h3>
+                    <div class="h-64"><canvas id="chartStatus"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: STOCK LIST TABLE -->
+        <div id="view-stock" class="tab-content hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
+                <div class="flex flex-1 gap-2 w-full">
+                    <input type="text" id="searchStockInput" onkeyup="renderStockTable()" placeholder="Cari VIN, Model, Warna, atau Slot..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                    <select id="filterStatus" onchange="renderStockTable()" class="text-xs p-2.5 border border-slate-300 rounded-xl bg-slate-50">
+                        <option value="ALL">Semua Status</option>
+                        <option value="Belum PDI">Belum PDI</option>
+                        <option value="Proses PDI">Proses PDI</option>
+                        <option value="Ready Delivery">Ready Delivery</option>
+                        <option value="Sudah Keluar">Sudah Keluar (History)</option>
+                    </select>
+                </div>
+                <button onclick="openAddModal()" class="w-full md:w-auto px-4 py-2.5 bg-toyota-red hover:bg-red-700 text-white font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-md">
+                    <i class="fa-solid fa-plus"></i><span>Input Unit Masuk</span>
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-600">
+                        <thead class="bg-slate-900 text-white font-bold uppercase text-[10px] tracking-wider">
+                            <tr>
+                                <th class="p-3.5">VIN / No. Rangka</th>
+                                <th class="p-3.5">Model Kendaraan</th>
+                                <th class="p-3.5">Warna</th>
+                                <th class="p-3.5">Slot Parkir</th>
+                                <th class="p-3.5">Tgl Masuk</th>
+                                <th class="p-3.5">Status PDI</th>
+                                <th class="p-3.5 text-center">Aksi Quick</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody" class="divide-y divide-slate-100 font-medium"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-okk" class="tab-content hidden space-y-6">
+            <div class="bg-gradient-to-r from-blue-900 via-slate-800 to-gray-900 rounded-2xl p-6 text-white shadow-lg border border-blue-800">
+                <h2 class="text-xl font-extrabold flex items-center space-x-2">
+                    <i class="fa-solid fa-file-signature text-blue-400"></i>
+                    <span>Order Kirim Kendaraan (OKK) Generator</span>
+                </h2>
+                <p class="text-xs text-slate-300 mt-1">Cetak dokumen official pengiriman kendaraan dengan tarik data VIN otomatis.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Dropdown Selector -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-sm text-slate-800 border-b pb-2">Tarik Data No Rangka</h3>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Pilih VIN Stok Active</label>
+                        <select id="okkVinSelect" onchange="loadOkkVinData()" class="w-full text-xs p-2.5 border border-slate-300 rounded-xl bg-slate-50 font-mono font-bold">
+                            <option value="">-- Pilih No Rangka --</option>
+                        </select>
+                    </div>
+                    <div id="okkUnitInfoBox" class="bg-blue-50 p-4 rounded-xl text-xs space-y-2 hidden">
+                        <div class="flex justify-between border-b border-blue-200 pb-1">
+                            <span class="text-slate-500">Model:</span><span id="infoOkkModel" class="font-bold text-blue-900"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-blue-200 pb-1">
+                            <span class="text-slate-500">No Mesin:</span><span id="infoOkkEngine" class="font-bold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Slot Parkir:</span><span id="infoOkkSlot" class="font-bold text-red-600"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form OKK -->
+                <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="font-bold text-sm text-slate-800 border-b pb-2">Form Rincian Pengiriman</h3>
+                    <form onsubmit="handleSaveAndPrintOKK(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Nomor OKK</label>
+                                <input type="text" id="okkFormNumber" required class="w-full text-xs p-2 border rounded font-mono font-bold bg-slate-50">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Tanggal</label>
+                                <input type="date" id="okkFormDate" required class="w-full text-xs p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Asal</label>
+                                <input type="text" id="okkFormOrigin" value="DAYA TOYOTA BEKASI" required class="w-full text-xs p-2 border rounded">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Kepada (Transporter)</label>
+                                <input type="text" id="okkFormTransporter" value="PT. PARANI ARTAMANDIRI" required class="w-full text-xs p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Cabang Pemilik</label>
+                                <input type="text" id="okkFormOwnerBranch" value="DAYA TOYOTA CAKUNG" required class="w-full text-xs p-2 border rounded">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Tujuan</label>
+                                <input type="text" id="okkFormDestination" placeholder="Contoh: DAYA TOYOTA CAKUNG" required class="w-full text-xs p-2 border rounded">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-600">Catatan / Aksesories</label>
+                            <input type="text" id="okkFormAccessories" placeholder="PAMERAN HI PIC MALIK" class="w-full text-xs p-2 border rounded">
+                        </div>
+
+                        <div class="flex justify-end space-x-2 pt-2">
+                            <button type="button" onclick="previewOKKModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-xl text-xs font-bold">Preview Form OKK</button>
+                            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-md">Cetak & Simpan OKK</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- OTHER TAB VIEWS (Opname, Reports, Yard) -->
+        <div id="view-yard" class="tab-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm text-center">Yard Grid Map Loaded</div></div>
+        <div id="view-opname" class="tab-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm text-center">Opname & QR Scanner Loaded</div></div>
+        <div id="view-reports" class="tab-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm text-center">Report Module Loaded</div></div>
+    </main>
+
+    <div id="modalOKK" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
+            <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between print:hidden">
+                <h3 class="font-bold text-sm">Dokumen Preview OKK Resmi Daya Toyota</h3>
+                <div class="space-x-2">
+                    <button onclick="window.print()" class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold">Print Document</button>
+                    <button onclick="closeModal('modalOKK')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div id="printableOkkDocument" class="p-8 text-slate-900 font-sans text-xs bg-white space-y-4">
+                <div class="flex justify-between border-b-2 border-slate-900 pb-2">
+                    <div>
+                        <h1 class="font-extrabold text-sm">PT DAYA ADICIPTA SANDIKA</h1>
+                        <h2 class="font-bold text-xs">DAYA TOYOTA CAKUNG</h2>
+                        <p class="text-[10px]">JL. RAYA BEKASI KM 26.5 UJUNG MENTENG, CAKUNG</p>
+                    </div>
+                    <div class="text-right font-mono">
+                        <h2 class="font-extrabold text-base">ORDER KIRIM KENDARAAN</h2>
+                        <p>NOMOR : <strong id="previewOkkNo">DAS/OKK/20260906/0002</strong></p>
+                        <p>TANGGAL : <strong id="previewOkkDate">14 Sep 2026</strong></p>
+                    </div>
+                </div>
+                <!-- Replica details -->
+                <div class="grid grid-cols-2 gap-4 font-mono">
+                    <div>Tipe: <strong id="previewOkkModel"></strong></div>
+                    <div>Transporter: <strong id="previewOkkTransporter"></strong></div>
+                    <div>VIN: <strong id="previewOkkVin"></strong></div>
+                    <div>Tujuan: <strong id="previewOkkDestination"></strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System State
+        let GAS_API_URL = localStorage.getItem('https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec') || '';
+        let stockData = [];
+        let okkHistoryData = [];
+
+        window.onload = function() {
+            startClock();
+            fetchSystemData();
+        };
+
+        function startClock() {
+            setInterval(() => {
+                const d = new Date();
+                document.getElementById('liveClock').textContent = d.toLocaleTimeString('id-ID') + ' WIB';
+            }, 1000);
+        }
+
+        async function fetchSystemData() {
+            if (!GAS_API_URL) {
+                console.log("GAS API URL Belum di-set, menggunakan mode Demo Offline.");
+                seedMockFrontendData();
+                return;
+            }
+
+            try {
+                const res = await fetch(`${GAS_API_URL}?action=getAllData`);
+                const json = await res.json();
+                if (json.status === 'success') {
+                    stockData = json.stocks || [];
+                    okkHistoryData = json.okkHistory || [];
+                    renderStockTable();
+                    populateOkkVinDropdown();
+                    renderDashboard();
+                }
+            } catch (err) {
+                console.error("Gagal sinkronisasi ke GAS:", err);
+                seedMockFrontendData();
+            }
+        }
+
+        function seedMockFrontendData() {
+            stockData = [
+                { vin: "MHKSK12345678901", engine: "1NR-FE882", model: "Kijang Innova Zenix", color: "Platinum White", parkingSlot: "A-01", entryDate: "2026-09-10T08:30", pdiStatus: "Ready Delivery" },
+                { vin: "MHKSK98765432102", engine: "1GD-FTV991", model: "Fortuner 2.8 GR", color: "Attitude Black", parkingSlot: "A-02", entryDate: "2026-09-11T10:15", pdiStatus: "Proses PDI" }
+            ];
+            renderStockTable();
+            populateOkkVinDropdown();
+            renderDashboard();
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('border-toyota-red', 'text-white'));
+            
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('border-toyota-red', 'text-white');
+        }
+
+        function renderStockTable() {
+            const tbody = document.getElementById('stockTableBody');
+            tbody.innerHTML = stockData.map(item => `
+                <tr class="hover:bg-slate-50 border-b border-slate-100">
+                    <td class="p-3.5 font-mono font-bold text-slate-900">${item.vin}</td>
+                    <td class="p-3.5 font-bold">${item.model}</td>
+                    <td class="p-3.5">${item.color}</td>
+                    <td class="p-3.5 font-bold text-red-600">${item.parkingSlot}</td>
+                    <td class="p-3.5 text-xs">${item.entryDate ? item.entryDate.slice(0,10) : '-'}</td>
+                    <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${item.pdiStatus}</span></td>
+                    <td class="p-3.5 text-center">
+                        <button onclick="openOKKForVin('${item.vin}')" class="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold">OKK</button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('badgeTotalStock').textContent = stockData.length;
+        }
+
+        function populateOkkVinDropdown() {
+            const sel = document.getElementById('okkVinSelect');
+            sel.innerHTML = '<option value="">-- Pilih No Rangka --</option>' + 
+                stockData.map(u => `<option value="${u.vin}">${u.vin} - ${u.model}</option>`).join('');
+        }
+
+        function loadOkkVinData() {
+            const vin = document.getElementById('okkVinSelect').value;
+            const unit = stockData.find(u => u.vin === vin);
+            if (unit) {
+                document.getElementById('infoOkkModel').textContent = unit.model;
+                document.getElementById('infoOkkEngine').textContent = unit.engine || '-';
+                document.getElementById('infoOkkSlot').textContent = unit.parkingSlot;
+                document.getElementById('okkUnitInfoBox').classList.remove('hidden');
+            }
+        }
+
+        function openOKKForVin(vin) {
+            switchTab('okk');
+            document.getElementById('okkVinSelect').value = vin;
+            loadOkkVinData();
+        }
+
+        function renderDashboard() {
+            document.getElementById('dashTotalInYard').textContent = stockData.length;
+            document.getElementById('dashReadyDelivery').textContent = stockData.filter(s => s.pdiStatus === 'Ready Delivery').length;
+            document.getElementById('dashProsesPdi').textContent = stockData.filter(s => s.pdiStatus === 'Proses PDI').length;
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</body>
+</html>
