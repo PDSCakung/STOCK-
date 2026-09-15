@@ -30,19 +30,12 @@
             body * { visibility: hidden; }
             #printableOkkDocument, #printableOkkDocument * { visibility: visible; }
             #printableOkkDocument {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                margin: 0;
-                padding: 16mm;
-                box-shadow: none !important;
+                position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 16mm; box-shadow: none !important;
             }
             #modalOKK { position: absolute; inset: 0; background: white !important; backdrop-filter: none !important; overflow: visible !important; }
             #modalOKK > div { box-shadow: none !important; max-width: 100% !important; margin: 0 !important; }
             @page { size: A4; margin: 0; }
         }
-        .print\:hidden { }
     </style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
@@ -57,7 +50,7 @@
                     <div>
                         <h1 class="text-lg font-extrabold tracking-tight flex items-center space-x-2">
                             <span>DAYA TOYOTA</span>
-                            <span class="text-xs bg-red-600/30 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-semibold">PDS SYSTEM</span>
+                            <span class="text-xs bg-red-600/30 text-red-400 border border-red-500/30 px-2 py-0.5 rounded-full font-semibold">PDS SYSTEM v3.2</span>
                         </h1>
                         <p class="text-[11px] text-slate-400 font-medium">Pre-Delivery Service & Yard Stock Control</p>
                     </div>
@@ -70,7 +63,7 @@
                     </button>
                     <div class="text-right hidden sm:block">
                         <div id="liveClock" class="text-xs font-mono font-bold text-slate-200">00:00:00 WIB</div>
-                        <div class="text-[10px] text-slate-400" id="liveDate">15 September 2026</div>
+                        <div class="text-[10px] text-slate-400" id="liveDate">-</div>
                     </div>
                 </div>
             </div>
@@ -85,6 +78,9 @@
                 <button onclick="switchTab('stock')" id="tab-stock" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
                     <i class="fa-solid fa-car-side"></i><span>Stok Unit</span>
                     <span id="badgeTotalStock" class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
+                </button>
+                <button onclick="switchTab('yard')" id="tab-yard" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                    <i class="fa-solid fa-square-parking text-emerald-400"></i><span>Denah Yard Map (1-190)</span>
                 </button>
                 <button onclick="switchTab('okk')" id="tab-okk" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
                     <i class="fa-solid fa-file-signature text-blue-400"></i><span>Order Kirim (OKK)</span>
@@ -119,10 +115,10 @@
                     </div>
                 </div>
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
-                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><i class="fa-solid fa-truck-ramp-box text-2xl"></i></div>
+                    <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><i class="fa-solid fa-square-parking text-2xl"></i></div>
                     <div>
-                        <div class="text-xs text-slate-500 font-semibold uppercase">Terkirim</div>
-                        <div class="text-2xl font-black text-slate-900" id="dashHandoverMonth">0</div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase">Slot Kosong Yard</div>
+                        <div class="text-2xl font-black text-slate-900" id="dashYardAvailable">190</div>
                     </div>
                 </div>
             </div>
@@ -159,9 +155,10 @@
                                 <th class="p-3.5">VIN / No. Rangka</th>
                                 <th class="p-3.5">Model Kendaraan</th>
                                 <th class="p-3.5">Warna</th>
-                                <th class="p-3.5">Customer</th>
-                                <th class="p-3.5">Sales</th>
+                                <th class="p-3.5">Nama Customer</th>
+                                <th class="p-3.5">Nama Sales</th>
                                 <th class="p-3.5">Slot Parkir</th>
+                                <th class="p-3.5">Tgl Masuk</th>
                                 <th class="p-3.5">Status PDI</th>
                                 <th class="p-3.5 text-center">Aksi Quick</th>
                             </tr>
@@ -172,7 +169,29 @@
             </div>
         </div>
 
-        <!-- VIEW 3: OKK GENERATOR -->
+        <!-- VIEW 3: DENAH YARD MAP (1-190) -->
+        <div id="view-yard" class="tab-content hidden space-y-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                        <i class="fa-solid fa-square-parking text-toyota-red"></i>
+                        <span>DENAH YARD MAP (SLOT 1 - 190)</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">Visualisasi realtime ketersediaan slot parkir kendaraan.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                    <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-lg border border-emerald-300"><i class="fa-solid fa-square text-emerald-500 mr-1"></i> Kosong</span>
+                    <span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg border border-amber-300"><i class="fa-solid fa-square text-amber-500 mr-1"></i> Belum/Proses PDI</span>
+                    <span class="px-2.5 py-1 bg-blue-100 text-blue-800 rounded-lg border border-blue-300"><i class="fa-solid fa-square text-blue-500 mr-1"></i> Ready Delivery</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 p-6 rounded-2xl shadow-inner border border-slate-800">
+                <div id="yardGridContainer" class="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-19 gap-2"></div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: ORDER KIRIM (OKK) -->
         <div id="view-okk" class="tab-content hidden space-y-6">
             <div class="bg-gradient-to-r from-blue-900 via-slate-800 to-gray-900 rounded-2xl p-6 text-white shadow-lg border border-blue-800">
                 <h2 class="text-xl font-extrabold flex items-center space-x-2">
@@ -183,7 +202,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Dropdown Selector -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-slate-800 border-b pb-2">Tarik Data No Rangka</h3>
                     <div>
@@ -208,7 +226,6 @@
                     </div>
                 </div>
 
-                <!-- Form OKK -->
                 <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                     <h3 class="font-bold text-sm text-slate-800 border-b pb-2">Form Rincian Pengiriman</h3>
                     <form id="formOkk" onsubmit="handleSaveAndPrintOKK(event)" class="space-y-4">
@@ -224,17 +241,6 @@
                             <div>
                                 <label class="block text-[10px] font-bold uppercase text-slate-600">Asal</label>
                                 <input type="text" id="okkFormOrigin" value="DAYA TOYOTA BEKASI" required class="w-full text-xs p-2 border rounded">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Customer</label>
-                                <input type="text" id="okkFormCustomer" required class="w-full text-xs p-2 border rounded font-semibold bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Sales</label>
-                                <input type="text" id="okkFormSales" required class="w-full text-xs p-2 border rounded font-semibold bg-slate-50">
                             </div>
                         </div>
 
@@ -270,15 +276,24 @@
         </div>
     </main>
 
+    <!-- MODAL: YARD SLOT DETAIL -->
+    <div id="modalSlotDetail" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto print:hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between">
+                <h3 class="font-bold text-sm">Detail Slot <span id="slotDetailTitle"></span></h3>
+                <button onclick="closeModal('modalSlotDetail')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="slotDetailBody" class="p-5 text-xs space-y-3"></div>
+        </div>
+    </div>
+
     <!-- MODAL: OKK PRINT PREVIEW -->
     <div id="modalOKK" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
             <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between print:hidden">
                 <h3 class="font-bold text-sm">Dokumen Preview OKK Resmi Daya Toyota</h3>
                 <div class="space-x-2">
-                    <button onclick="window.print()" class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold">
-                        <i class="fa-solid fa-print"></i> Print Document
-                    </button>
+                    <button onclick="window.print()" class="px-3 py-1 bg-blue-600 text-white rounded text-xs font-bold"><i class="fa-solid fa-print"></i> Print</button>
                     <button onclick="closeModal('modalOKK')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
@@ -295,19 +310,17 @@
                         <p>TANGGAL : <strong id="previewOkkDate">-</strong></p>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4 font-mono">
                     <div>Tipe: <strong id="previewOkkModel"></strong></div>
                     <div>Transporter: <strong id="previewOkkTransporter"></strong></div>
                     <div>VIN: <strong id="previewOkkVin"></strong></div>
-                    <div>Customer: <strong id="previewOkkCustomer"></strong></div>
-                    <div>Asal: <strong id="previewOkkOrigin"></strong></div>
-                    <div>Sales: <strong id="previewOkkSales"></strong></div>
                     <div>Tujuan: <strong id="previewOkkDestination"></strong></div>
+                    <div>Customer: <strong id="previewOkkCustomer"></strong></div>
+                    <div>Sales: <strong id="previewOkkSales"></strong></div>
+                    <div>Asal: <strong id="previewOkkOrigin"></strong></div>
                     <div>Cabang Pemilik: <strong id="previewOkkOwnerBranch"></strong></div>
                 </div>
                 <div class="font-mono">Catatan/Aksesoris: <strong id="previewOkkAccessories"></strong></div>
-
                 <div class="grid grid-cols-2 gap-8 pt-10 text-center font-mono">
                     <div>
                         <p>Diserahkan oleh,</p>
@@ -335,8 +348,7 @@
                 <div class="bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-xl p-3 flex items-start space-x-2">
                     <i class="fa-solid fa-circle-info mt-0.5"></i>
                     <div>
-                        Format kolom CSV yang didukung: <code class="font-mono font-bold">vin, engine, model, color, customerName, salesName, parkingSlot, entryDate, pdiStatus, notes</code>.
-                        <br>Kolom <strong>vin</strong> dan <strong>model</strong> wajib diisi. Baris dengan VIN kosong atau VIN terdaftar di sistem akan dilewati secara otomatis.
+                        Format header CSV: <code class="font-mono font-bold">vin, engine, model, color, customerName, salesName, parkingSlot, entryDate, pdiStatus, notes</code>.
                     </div>
                 </div>
 
@@ -361,11 +373,10 @@
                                 <tr>
                                     <th class="p-2">VIN</th>
                                     <th class="p-2">Model</th>
-                                    <th class="p-2">Warna</th>
                                     <th class="p-2">Customer</th>
                                     <th class="p-2">Sales</th>
                                     <th class="p-2">Slot</th>
-                                    <th class="p-2">Status PDI</th>
+                                    <th class="p-2">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="bulkPreviewBody" class="divide-y divide-slate-100"></tbody>
@@ -409,22 +420,22 @@
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-600">Warna</label>
-                        <input type="text" id="addColor" required class="w-full text-xs p-2.5 border rounded-xl">
+                        <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Customer</label>
+                        <input type="text" id="addCustomerName" placeholder="Contoh: Budi Santoso" class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-600">Slot Parkir</label>
-                        <input type="text" id="addParkingSlot" required class="w-full text-xs p-2.5 border rounded-xl">
+                        <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Sales</label>
+                        <input type="text" id="addSalesName" placeholder="Contoh: Ahmad Sales" class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Customer</label>
-                        <input type="text" id="addCustomerName" class="w-full text-xs p-2.5 border rounded-xl" placeholder="Nama Pembeli">
+                        <label class="block text-[10px] font-bold uppercase text-slate-600">Warna</label>
+                        <input type="text" id="addColor" required class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Sales</label>
-                        <input type="text" id="addSalesName" class="w-full text-xs p-2.5 border rounded-xl" placeholder="Sales Executive">
+                        <label class="block text-[10px] font-bold uppercase text-slate-600">Slot Parkir (1 - 190)</label>
+                        <input type="text" id="addParkingSlot" placeholder="Contoh: 15" required class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                 </div>
                 <div>
@@ -455,7 +466,6 @@
             <div class="p-6 space-y-3">
                 <label class="block text-[10px] font-bold uppercase text-slate-600">Web App URL (deployment /exec)</label>
                 <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/xxxx/exec" class="w-full text-xs p-2.5 border rounded-xl font-mono">
-                <p class="text-[11px] text-slate-500">Kosongkan lalu simpan untuk kembali ke mode Demo Offline.</p>
                 <div class="flex justify-end space-x-2 pt-2">
                     <button onclick="saveApiConfig()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold shadow-md">Simpan & Sinkronkan</button>
                 </div>
@@ -532,6 +542,7 @@
                     okkHistoryData = json.okkHistory || [];
                     renderStockTable();
                     populateOkkVinDropdown();
+                    renderYardMap();
                     renderDashboard();
                 }
             } catch (err) {
@@ -546,8 +557,8 @@
                 engine: row.EngineNumber || row.engine,
                 model: row.Model || row.model,
                 color: row.Color || row.color,
-                customerName: row.CustomerName || row.customerName || row.customer || '-',
-                salesName: row.SalesName || row.salesName || row.sales || '-',
+                customerName: row.CustomerName || row.customerName || '-',
+                salesName: row.SalesName || row.salesName || '-',
                 parkingSlot: row.ParkingSlot || row.parkingSlot,
                 entryDate: row.EntryDate || row.entryDate,
                 exitDate: row.ExitDate || row.exitDate,
@@ -558,11 +569,14 @@
 
         function seedMockFrontendData() {
             stockData = [
-                { vin: "MHKSK12345678901", engine: "1NR-FE882", model: "Kijang Innova Zenix", color: "Platinum White", customerName: "Budi Santoso", salesName: "Rudi Sales", parkingSlot: "A-01", entryDate: "2026-09-10T08:30", pdiStatus: "Ready Delivery" },
-                { vin: "MHKSK98765432102", engine: "1GD-FTV991", model: "Fortuner 2.8 GR", color: "Attitude Black", customerName: "PT Sukses Mandiri", salesName: "Andi Sales", parkingSlot: "A-02", entryDate: "2026-09-11T10:15", pdiStatus: "Proses PDI" }
+                { vin: "MHKSK12345678901", engine: "1NR-FE882", model: "Kijang Innova Zenix", color: "Platinum White", customerName: "Budi Santoso", salesName: "Ahmad Sales", parkingSlot: "1", entryDate: "2026-09-10T08:30", pdiStatus: "Ready Delivery" },
+                { vin: "MHKSK98765432102", engine: "1GD-FTV991", model: "Fortuner 2.8 GR", color: "Attitude Black", customerName: "Siti Rahma", salesName: "Dedi Sales", parkingSlot: "2", entryDate: "2026-09-11T10:15", pdiStatus: "Proses PDI" },
+                { vin: "MHKSK33445566703", engine: "2NR-VE102", model: "Veloz 1.5 Q CVT", color: "Silver Metallic", customerName: "Hendra Wijaya", salesName: "Ahmad Sales", parkingSlot: "15", entryDate: "2026-09-12T14:00", pdiStatus: "Cuci & Aksesoris" },
+                { vin: "MHKSK77889900104", engine: "2NR-VE443", model: "Avanza 1.5 G CVT", color: "Gray Metallic", customerName: "CV Trans Logistik", salesName: "Rian Sales", parkingSlot: "190", entryDate: "2026-09-13T09:00", pdiStatus: "Belum PDI" }
             ];
             renderStockTable();
             populateOkkVinDropdown();
+            renderYardMap();
             renderDashboard();
         }
 
@@ -572,6 +586,8 @@
 
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             document.getElementById(`tab-${tab}`).classList.add('border-toyota-red', 'text-white');
+
+            if (tab === 'yard') renderYardMap();
         }
 
         function renderStockTable() {
@@ -591,23 +607,100 @@
                     <td class="p-3.5 font-mono font-bold text-slate-900">${item.vin}</td>
                     <td class="p-3.5 font-bold">${item.model}</td>
                     <td class="p-3.5">${item.color}</td>
-                    <td class="p-3.5 font-semibold text-slate-800">${item.customerName || '-'}</td>
-                    <td class="p-3.5 font-semibold text-slate-700">${item.salesName || '-'}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${item.customerName}</td>
+                    <td class="p-3.5 text-slate-600">${item.salesName}</td>
                     <td class="p-3.5 font-bold text-red-600">${item.parkingSlot}</td>
+                    <td class="p-3.5 text-xs">${item.entryDate ? String(item.entryDate).slice(0,10) : '-'}</td>
                     <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${item.pdiStatus}</span></td>
                     <td class="p-3.5 text-center">
-                        <button onclick="openOKKForVin('${item.vin}')" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">OKK</button>
+                        <button onclick="openOKKForVin('${item.vin}')" class="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold">OKK</button>
                     </td>
                 </tr>
             `).join('');
             document.getElementById('badgeTotalStock').textContent = stockData.length;
         }
 
+        // ===================== DENAH YARD MAP (1 - 190) =====================
+        function renderYardMap() {
+            const container = document.getElementById('yardGridContainer');
+            if (!container) return;
+
+            let html = '';
+            const activeStock = stockData.filter(u => u.pdiStatus !== 'Sudah Keluar');
+
+            for (let i = 1; i <= 190; i++) {
+                const unit = activeStock.find(u => {
+                    const slotStr = String(u.parkingSlot || '').trim().toLowerCase();
+                    const cleanNum = slotStr.replace(/\D/g, '');
+                    return cleanNum === String(i) || slotStr === String(i);
+                });
+
+                let statusBg = 'bg-emerald-950/40 border-emerald-700/50 text-emerald-400 hover:bg-emerald-900/60';
+                let indicator = '<span class="text-[9px] text-emerald-500 font-normal">KOSONG</span>';
+
+                if (unit) {
+                    if (unit.pdiStatus === 'Ready Delivery') {
+                        statusBg = 'bg-blue-950/60 border-blue-600 text-blue-300 hover:bg-blue-900';
+                        indicator = `<span class="truncate block text-[9px] text-blue-300 font-bold">${unit.model}</span>`;
+                    } else {
+                        statusBg = 'bg-amber-950/60 border-amber-600 text-amber-300 hover:bg-amber-900';
+                        indicator = `<span class="truncate block text-[9px] text-amber-300 font-bold">${unit.model}</span>`;
+                    }
+                }
+
+                html += `
+                    <button onclick="openSlotDetail(${i})" class="p-2 border rounded-xl flex flex-col justify-between h-16 transition text-left ${statusBg}">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-extrabold text-xs font-mono">#${i}</span>
+                            ${unit ? '<i class="fa-solid fa-car text-[10px]"></i>' : ''}
+                        </div>
+                        <div class="w-full overflow-hidden">
+                            ${indicator}
+                        </div>
+                    </button>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function openSlotDetail(slotNumber) {
+            const unit = stockData.find(u => {
+                const slotStr = String(u.parkingSlot || '').trim().toLowerCase();
+                const cleanNum = slotStr.replace(/\D/g, '');
+                return (cleanNum === String(slotNumber) || slotStr === String(slotNumber)) && u.pdiStatus !== 'Sudah Keluar';
+            });
+
+            document.getElementById('slotDetailTitle').textContent = `#${slotNumber}`;
+            const body = document.getElementById('slotDetailBody');
+
+            if (unit) {
+                body.innerHTML = `
+                    <div class="bg-slate-100 p-3 rounded-xl space-y-2">
+                        <div><span class="text-slate-400 block text-[10px] uppercase font-bold">VIN</span><span class="font-mono font-bold text-slate-900">${unit.vin}</span></div>
+                        <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Model</span><span class="font-bold text-slate-800">${unit.model}</span></div>
+                        <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Customer</span><span class="font-bold text-slate-800">${unit.customerName}</span></div>
+                        <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Sales</span><span class="font-bold text-slate-800">${unit.salesName}</span></div>
+                        <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Status</span><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${unit.pdiStatus}</span></div>
+                    </div>
+                `;
+            } else {
+                body.innerHTML = `
+                    <div class="text-center py-6 text-slate-500">
+                        <i class="fa-solid fa-square-parking text-4xl mb-2 text-emerald-500"></i>
+                        <p class="font-bold text-slate-700">Slot Terbuka / Kosong</p>
+                        <p class="text-[11px]">Slot parkir #${slotNumber} tersedia untuk unit baru.</p>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modalSlotDetail').classList.remove('hidden');
+        }
+
         function populateOkkVinDropdown() {
             const sel = document.getElementById('okkVinSelect');
             const activeUnits = stockData.filter(u => u.pdiStatus !== 'Sudah Keluar');
             sel.innerHTML = '<option value="">-- Pilih No Rangka --</option>' +
-                activeUnits.map(u => `<option value="${u.vin}">${u.vin} - ${u.model} (${u.customerName || 'No Customer'})</option>`).join('');
+                activeUnits.map(u => `<option value="${u.vin}">${u.vin} - ${u.model} (${u.customerName})</option>`).join('');
         }
 
         function loadOkkVinData() {
@@ -618,9 +711,6 @@
                 document.getElementById('infoOkkCustomer').textContent = unit.customerName || '-';
                 document.getElementById('infoOkkSales').textContent = unit.salesName || '-';
                 document.getElementById('infoOkkSlot').textContent = unit.parkingSlot;
-
-                document.getElementById('okkFormCustomer').value = unit.customerName || '';
-                document.getElementById('okkFormSales').value = unit.salesName || '';
                 document.getElementById('okkUnitInfoBox').classList.remove('hidden');
             } else {
                 document.getElementById('okkUnitInfoBox').classList.add('hidden');
@@ -640,14 +730,14 @@
                 number: document.getElementById('okkFormNumber').value.trim(),
                 date: document.getElementById('okkFormDate').value,
                 origin: document.getElementById('okkFormOrigin').value.trim(),
-                customerName: document.getElementById('okkFormCustomer').value.trim(),
-                salesName: document.getElementById('okkFormSales').value.trim(),
                 transporter: document.getElementById('okkFormTransporter').value.trim(),
                 ownerBranch: document.getElementById('okkFormOwnerBranch').value.trim(),
                 destination: document.getElementById('okkFormDestination').value.trim(),
                 accessories: document.getElementById('okkFormAccessories').value.trim(),
                 vin: vin,
-                model: unit ? unit.model : ''
+                model: unit ? unit.model : '',
+                customerName: unit ? unit.customerName : '-',
+                salesName: unit ? unit.salesName : '-'
             };
         }
 
@@ -662,10 +752,10 @@
             document.getElementById('previewOkkNo').textContent = data.number || '-';
             document.getElementById('previewOkkDate').textContent = formatTanggalID(data.date);
             document.getElementById('previewOkkModel').textContent = data.model || '-';
-            document.getElementById('previewOkkCustomer').textContent = data.customerName || '-';
-            document.getElementById('previewOkkSales').textContent = data.salesName || '-';
             document.getElementById('previewOkkTransporter').textContent = data.transporter || '-';
             document.getElementById('previewOkkVin').textContent = data.vin || '-';
+            document.getElementById('previewOkkCustomer').textContent = data.customerName || '-';
+            document.getElementById('previewOkkSales').textContent = data.salesName || '-';
             document.getElementById('previewOkkDestination').textContent = data.destination || '-';
             document.getElementById('previewOkkOrigin').textContent = data.origin || '-';
             document.getElementById('previewOkkOwnerBranch').textContent = data.ownerBranch || '-';
@@ -719,7 +809,6 @@
 
                 fillOkkPreview(data);
                 document.getElementById('modalOKK').classList.remove('hidden');
-
                 setTimeout(() => window.print(), 300);
 
                 document.getElementById('formOkk').reset();
@@ -731,13 +820,12 @@
             } catch (e) {
                 errBox.textContent = 'Gagal menyimpan OKK: ' + e.message;
                 errBox.classList.remove('hidden');
-            } finally {
+            } font-extrabold {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Cetak & Simpan OKK';
             }
         }
 
-        // ===================== SINGLE ADD UNIT =====================
         function openAddModal() {
             document.getElementById('addStockError').classList.add('hidden');
             document.getElementById('modalAddStock').classList.remove('hidden');
@@ -749,9 +837,9 @@
                 vin: document.getElementById('addVin').value.trim(),
                 model: document.getElementById('addModel').value.trim(),
                 engine: document.getElementById('addEngine').value.trim(),
-                color: document.getElementById('addColor').value.trim(),
                 customerName: document.getElementById('addCustomerName').value.trim(),
                 salesName: document.getElementById('addSalesName').value.trim(),
+                color: document.getElementById('addColor').value.trim(),
                 parkingSlot: document.getElementById('addParkingSlot').value.trim(),
                 pdiStatus: document.getElementById('addPdiStatus').value
             };
@@ -774,7 +862,6 @@
             }
         }
 
-        // ===================== BULK UPLOAD FITUR =====================
         function openBulkUploadModal() {
             bulkParsedRows = [];
             document.getElementById('bulkFileInput').value = '';
@@ -787,7 +874,7 @@
 
         function downloadBulkTemplate() {
             const header = 'vin,engine,model,color,customerName,salesName,parkingSlot,entryDate,pdiStatus,notes';
-            const sample = 'MHKSK00000000001,1NR-FE001,Avanza 1.5 G CVT,White,Budi Santoso,Rudi Sales,C-01,2026-09-15,Belum PDI,Unit Pesanan Baru';
+            const sample = 'MHKSK00000000001,1NR-FE001,Avanza 1.5 G CVT,White,Budi Santoso,Ahmad Sales,1,2026-09-15,Belum PDI,Contoh Bulk';
             const csv = header + '\n' + sample + '\n';
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -813,16 +900,16 @@
                 complete: function(results) {
                     bulkParsedRows = (results.data || [])
                         .map(row => ({
-                            vin: (row.vin || row.VIN || '').trim(),
-                            engine: (row.engine || row.Engine || '').trim(),
-                            model: (row.model || row.Model || '').trim(),
-                            color: (row.color || row.Color || '').trim(),
-                            customerName: (row.customerName || row.customer_name || row.customer || '').trim(),
-                            salesName: (row.salesName || row.sales_name || row.sales || '').trim(),
-                            parkingSlot: (row.parkingSlot || row.parking_slot || row.slot || '').trim(),
-                            entryDate: (row.entryDate || row.entry_date || '').trim(),
-                            pdiStatus: (row.pdiStatus || row.pdi_status || '').trim(),
-                            notes: (row.notes || row.Notes || '').trim()
+                            vin: (row.vin || '').trim(),
+                            engine: (row.engine || '').trim(),
+                            model: (row.model || '').trim(),
+                            color: (row.color || '').trim(),
+                            customerName: (row.customerName || '').trim(),
+                            salesName: (row.salesName || '').trim(),
+                            parkingSlot: (row.parkingSlot || '').trim(),
+                            entryDate: (row.entryDate || '').trim(),
+                            pdiStatus: (row.pdiStatus || '').trim(),
+                            notes: (row.notes || '').trim()
                         }))
                         .filter(row => row.vin || row.model);
 
@@ -851,11 +938,10 @@
             document.getElementById('bulkPreviewCount').textContent = bulkParsedRows.length;
             body.innerHTML = bulkParsedRows.map(r => `
                 <tr>
-                    <td class="p-2 font-mono font-bold">${r.vin || '<span class="text-red-500">(kosong)</span>'}</td>
-                    <td class="p-2 font-bold">${r.model || '<span class="text-red-500">(kosong)</span>'}</td>
-                    <td class="p-2">${r.color || '-'}</td>
-                    <td class="p-2 font-semibold text-slate-800">${r.customerName || '-'}</td>
-                    <td class="p-2 font-semibold text-slate-700">${r.salesName || '-'}</td>
+                    <td class="p-2 font-mono">${r.vin || '<span class="text-red-500">(kosong)</span>'}</td>
+                    <td class="p-2">${r.model || '<span class="text-red-500">(kosong)</span>'}</td>
+                    <td class="p-2">${r.customerName || '-'}</td>
+                    <td class="p-2">${r.salesName || '-'}</td>
                     <td class="p-2">${r.parkingSlot || '-'}</td>
                     <td class="p-2">${r.pdiStatus || 'Belum PDI'}</td>
                 </tr>
@@ -944,10 +1030,11 @@
         }
 
         function renderDashboard() {
-            document.getElementById('dashTotalInYard').textContent = stockData.filter(s => s.pdiStatus !== 'Sudah Keluar').length;
+            const inYard = stockData.filter(s => s.pdiStatus !== 'Sudah Keluar');
+            document.getElementById('dashTotalInYard').textContent = inYard.length;
             document.getElementById('dashReadyDelivery').textContent = stockData.filter(s => s.pdiStatus === 'Ready Delivery').length;
             document.getElementById('dashProsesPdi').textContent = stockData.filter(s => s.pdiStatus === 'Proses PDI').length;
-            document.getElementById('dashHandoverMonth').textContent = stockData.filter(s => s.pdiStatus === 'Sudah Keluar').length;
+            document.getElementById('dashYardAvailable').textContent = Math.max(0, 190 - inYard.length);
         }
 
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
