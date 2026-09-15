@@ -7,8 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
@@ -28,12 +26,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
 
-        /* ===================== PRINT FIX (OKK) =====================
-           Without this block, window.print() prints the ENTIRE page
-           (header, nav, backdrop, other hidden tabs) because Tailwind's
-           `hidden` class is overridden by the print stylesheet in some
-           browsers, and the modal wrapper itself has no page sizing.
-           This isolates #printableOkkDocument as the only printable node. */
         @media print {
             body * { visibility: hidden; }
             #printableOkkDocument, #printableOkkDocument * { visibility: visible; }
@@ -78,7 +70,7 @@
                     </button>
                     <div class="text-right hidden sm:block">
                         <div id="liveClock" class="text-xs font-mono font-bold text-slate-200">00:00:00 WIB</div>
-                        <div class="text-[10px] text-slate-400" id="liveDate">14 September 2026</div>
+                        <div class="text-[10px] text-slate-400" id="liveDate">15 September 2026</div>
                     </div>
                 </div>
             </div>
@@ -94,17 +86,8 @@
                     <i class="fa-solid fa-car-side"></i><span>Stok Unit</span>
                     <span id="badgeTotalStock" class="bg-red-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">0</span>
                 </button>
-                <button onclick="switchTab('yard')" id="tab-yard" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
-                    <i class="fa-solid fa-square-parking"></i><span>Yard Map</span>
-                </button>
-                <button onclick="switchTab('opname')" id="tab-opname" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
-                    <i class="fa-solid fa-qrcode text-amber-400"></i><span>Stock Opname & QR</span>
-                </button>
                 <button onclick="switchTab('okk')" id="tab-okk" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
                     <i class="fa-solid fa-file-signature text-blue-400"></i><span>Order Kirim (OKK)</span>
-                </button>
-                <button onclick="switchTab('reports')" id="tab-reports" class="nav-tab py-3 px-3.5 border-b-2 border-transparent text-slate-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
-                    <i class="fa-solid fa-file-invoice text-emerald-400"></i><span>Laporan & Export</span>
                 </button>
             </div>
         </div>
@@ -138,20 +121,9 @@
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center space-x-4">
                     <div class="p-3 bg-blue-100 text-blue-600 rounded-xl"><i class="fa-solid fa-truck-ramp-box text-2xl"></i></div>
                     <div>
-                        <div class="text-xs text-slate-500 font-semibold uppercase">Terkirim (Month)</div>
+                        <div class="text-xs text-slate-500 font-semibold uppercase">Terkirim</div>
                         <div class="text-2xl font-black text-slate-900" id="dashHandoverMonth">0</div>
                     </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-slate-800 text-sm mb-4">Distribusi Unit Berdasarkan Model</h3>
-                    <div class="h-64"><canvas id="chartModel"></canvas></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 class="font-bold text-slate-800 text-sm mb-4">Status Progress PDI Yard</h3>
-                    <div class="h-64"><canvas id="chartStatus"></canvas></div>
                 </div>
             </div>
         </div>
@@ -160,7 +132,7 @@
         <div id="view-stock" class="tab-content hidden space-y-4">
             <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-3 items-center justify-between">
                 <div class="flex flex-1 gap-2 w-full">
-                    <input type="text" id="searchStockInput" onkeyup="renderStockTable()" placeholder="Cari VIN, Model, Warna, atau Slot..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
+                    <input type="text" id="searchStockInput" onkeyup="renderStockTable()" placeholder="Cari VIN, Model, Customer, Sales, atau Slot..." class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 outline-none">
                     <select id="filterStatus" onchange="renderStockTable()" class="text-xs p-2.5 border border-slate-300 rounded-xl bg-slate-50">
                         <option value="ALL">Semua Status</option>
                         <option value="Belum PDI">Belum PDI</option>
@@ -187,8 +159,9 @@
                                 <th class="p-3.5">VIN / No. Rangka</th>
                                 <th class="p-3.5">Model Kendaraan</th>
                                 <th class="p-3.5">Warna</th>
+                                <th class="p-3.5">Customer</th>
+                                <th class="p-3.5">Sales</th>
                                 <th class="p-3.5">Slot Parkir</th>
-                                <th class="p-3.5">Tgl Masuk</th>
                                 <th class="p-3.5">Status PDI</th>
                                 <th class="p-3.5 text-center">Aksi Quick</th>
                             </tr>
@@ -199,6 +172,7 @@
             </div>
         </div>
 
+        <!-- VIEW 3: OKK GENERATOR -->
         <div id="view-okk" class="tab-content hidden space-y-6">
             <div class="bg-gradient-to-r from-blue-900 via-slate-800 to-gray-900 rounded-2xl p-6 text-white shadow-lg border border-blue-800">
                 <h2 class="text-xl font-extrabold flex items-center space-x-2">
@@ -223,7 +197,10 @@
                             <span class="text-slate-500">Model:</span><span id="infoOkkModel" class="font-bold text-blue-900"></span>
                         </div>
                         <div class="flex justify-between border-b border-blue-200 pb-1">
-                            <span class="text-slate-500">No Mesin:</span><span id="infoOkkEngine" class="font-bold"></span>
+                            <span class="text-slate-500">Customer:</span><span id="infoOkkCustomer" class="font-bold text-slate-800"></span>
+                        </div>
+                        <div class="flex justify-between border-b border-blue-200 pb-1">
+                            <span class="text-slate-500">Sales:</span><span id="infoOkkSales" class="font-bold text-slate-800"></span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-slate-500">Slot Parkir:</span><span id="infoOkkSlot" class="font-bold text-red-600"></span>
@@ -247,6 +224,17 @@
                             <div>
                                 <label class="block text-[10px] font-bold uppercase text-slate-600">Asal</label>
                                 <input type="text" id="okkFormOrigin" value="DAYA TOYOTA BEKASI" required class="w-full text-xs p-2 border rounded">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Customer</label>
+                                <input type="text" id="okkFormCustomer" required class="w-full text-xs p-2 border rounded font-semibold bg-slate-50">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Sales</label>
+                                <input type="text" id="okkFormSales" required class="w-full text-xs p-2 border rounded font-semibold bg-slate-50">
                             </div>
                         </div>
 
@@ -280,14 +268,9 @@
                 </div>
             </div>
         </div>
-
-        <!-- OTHER TAB VIEWS (Opname, Reports, Yard) -->
-        <div id="view-yard" class="tab-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm text-center">Yard Grid Map Loaded</div></div>
-        <div id="view-opname" class="tab-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm text-center">Opname & QR Scanner Loaded</div></div>
-        <div id="view-reports" class="tab-content hidden"><div class="bg-white p-6 rounded-2xl shadow-sm text-center">Report Module Loaded</div></div>
     </main>
 
-    <!-- ============== MODAL: OKK PRINT PREVIEW ============== -->
+    <!-- MODAL: OKK PRINT PREVIEW -->
     <div id="modalOKK" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
             <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between print:hidden">
@@ -312,13 +295,15 @@
                         <p>TANGGAL : <strong id="previewOkkDate">-</strong></p>
                     </div>
                 </div>
-                <!-- Replica details -->
+
                 <div class="grid grid-cols-2 gap-4 font-mono">
                     <div>Tipe: <strong id="previewOkkModel"></strong></div>
                     <div>Transporter: <strong id="previewOkkTransporter"></strong></div>
                     <div>VIN: <strong id="previewOkkVin"></strong></div>
-                    <div>Tujuan: <strong id="previewOkkDestination"></strong></div>
+                    <div>Customer: <strong id="previewOkkCustomer"></strong></div>
                     <div>Asal: <strong id="previewOkkOrigin"></strong></div>
+                    <div>Sales: <strong id="previewOkkSales"></strong></div>
+                    <div>Tujuan: <strong id="previewOkkDestination"></strong></div>
                     <div>Cabang Pemilik: <strong id="previewOkkOwnerBranch"></strong></div>
                 </div>
                 <div class="font-mono">Catatan/Aksesoris: <strong id="previewOkkAccessories"></strong></div>
@@ -339,9 +324,9 @@
         </div>
     </div>
 
-    <!-- ============== MODAL: BULK UPLOAD STOK (CSV) ============== -->
+    <!-- MODAL: BULK UPLOAD STOK (CSV) -->
     <div id="modalBulkUpload" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto print:hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full my-8 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full my-8 overflow-hidden">
             <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between">
                 <h3 class="font-bold text-sm flex items-center space-x-2"><i class="fa-solid fa-file-arrow-up text-amber-400"></i><span>Bulk Upload Unit Stok (CSV)</span></h3>
                 <button onclick="closeModal('modalBulkUpload')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -350,8 +335,8 @@
                 <div class="bg-blue-50 border border-blue-200 text-blue-900 text-xs rounded-xl p-3 flex items-start space-x-2">
                     <i class="fa-solid fa-circle-info mt-0.5"></i>
                     <div>
-                        Format kolom CSV: <code class="font-mono font-bold">vin, engine, model, color, parkingSlot, entryDate, pdiStatus, notes</code>.
-                        Kolom <strong>vin</strong> dan <strong>model</strong> wajib diisi. Baris dengan VIN kosong atau VIN yang sudah terdaftar akan otomatis dilewati (tidak menggagalkan seluruh upload).
+                        Format kolom CSV yang didukung: <code class="font-mono font-bold">vin, engine, model, color, customerName, salesName, parkingSlot, entryDate, pdiStatus, notes</code>.
+                        <br>Kolom <strong>vin</strong> dan <strong>model</strong> wajib diisi. Baris dengan VIN kosong atau VIN terdaftar di sistem akan dilewati secara otomatis.
                     </div>
                 </div>
 
@@ -374,8 +359,13 @@
                         <table class="w-full text-left text-[11px]">
                             <thead class="bg-slate-100 text-slate-600 font-bold uppercase sticky top-0">
                                 <tr>
-                                    <th class="p-2">VIN</th><th class="p-2">Model</th><th class="p-2">Warna</th>
-                                    <th class="p-2">Slot</th><th class="p-2">Status PDI</th>
+                                    <th class="p-2">VIN</th>
+                                    <th class="p-2">Model</th>
+                                    <th class="p-2">Warna</th>
+                                    <th class="p-2">Customer</th>
+                                    <th class="p-2">Sales</th>
+                                    <th class="p-2">Slot</th>
+                                    <th class="p-2">Status PDI</th>
                                 </tr>
                             </thead>
                             <tbody id="bulkPreviewBody" class="divide-y divide-slate-100"></tbody>
@@ -395,7 +385,7 @@
         </div>
     </div>
 
-    <!-- ============== MODAL: INPUT UNIT MASUK (SINGLE ADD) ============== -->
+    <!-- MODAL: INPUT UNIT MASUK -->
     <div id="modalAddStock" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto print:hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden">
             <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between">
@@ -427,6 +417,16 @@
                         <input type="text" id="addParkingSlot" required class="w-full text-xs p-2.5 border rounded-xl">
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Customer</label>
+                        <input type="text" id="addCustomerName" class="w-full text-xs p-2.5 border rounded-xl" placeholder="Nama Pembeli">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-600">Nama Sales</label>
+                        <input type="text" id="addSalesName" class="w-full text-xs p-2.5 border rounded-xl" placeholder="Sales Executive">
+                    </div>
+                </div>
                 <div>
                     <label class="block text-[10px] font-bold uppercase text-slate-600">Status PDI</label>
                     <select id="addPdiStatus" class="w-full text-xs p-2.5 border rounded-xl bg-slate-50">
@@ -445,7 +445,7 @@
         </div>
     </div>
 
-    <!-- ============== MODAL: API CONFIG ============== -->
+    <!-- MODAL: API CONFIG -->
     <div id="modalApiConfig" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden overflow-y-auto print:hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full my-8 overflow-hidden">
             <div class="bg-slate-900 text-white p-4 px-6 flex items-center justify-between">
@@ -464,7 +464,6 @@
     </div>
 
     <script>
-        // ===================== System State =====================
         let GAS_API_URL = localStorage.getItem('https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec') || '';
         let stockData = [];
         let okkHistoryData = [];
@@ -485,16 +484,13 @@
             }, 1000);
         }
 
-        // ===================== Generic API Helper =====================
-        // Every mutation (single add, bulk upload, OKK save) goes through this
-        // so error handling / offline-mode fallback is consistent everywhere.
         async function postToApi(action, payload) {
             if (!GAS_API_URL) {
-                throw new Error('URL Google Apps Script belum diset. Klik tombol "GAS Cloud" di kanan atas untuk menghubungkan.');
+                throw new Error('URL Google Apps Script belum diset.');
             }
             const res = await fetch(GAS_API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight on GAS
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify({ action, payload })
             });
             const json = await res.json();
@@ -524,7 +520,6 @@
 
         async function fetchSystemData() {
             if (!GAS_API_URL) {
-                console.log("GAS API URL Belum di-set, menggunakan mode Demo Offline.");
                 seedMockFrontendData();
                 return;
             }
@@ -545,14 +540,14 @@
             }
         }
 
-        // Sheet columns come back as e.g. `VIN`, `ParkingSlot`, `PDIStatus` (PascalCase).
-        // The rest of the UI expects lowerCamelCase keys (vin, parkingSlot, pdiStatus).
         function normalizeStockRecord(row) {
             return {
                 vin: row.VIN || row.vin,
                 engine: row.EngineNumber || row.engine,
                 model: row.Model || row.model,
                 color: row.Color || row.color,
+                customerName: row.CustomerName || row.customerName || row.customer || '-',
+                salesName: row.SalesName || row.salesName || row.sales || '-',
                 parkingSlot: row.ParkingSlot || row.parkingSlot,
                 entryDate: row.EntryDate || row.entryDate,
                 exitDate: row.ExitDate || row.exitDate,
@@ -563,8 +558,8 @@
 
         function seedMockFrontendData() {
             stockData = [
-                { vin: "MHKSK12345678901", engine: "1NR-FE882", model: "Kijang Innova Zenix", color: "Platinum White", parkingSlot: "A-01", entryDate: "2026-09-10T08:30", pdiStatus: "Ready Delivery" },
-                { vin: "MHKSK98765432102", engine: "1GD-FTV991", model: "Fortuner 2.8 GR", color: "Attitude Black", parkingSlot: "A-02", entryDate: "2026-09-11T10:15", pdiStatus: "Proses PDI" }
+                { vin: "MHKSK12345678901", engine: "1NR-FE882", model: "Kijang Innova Zenix", color: "Platinum White", customerName: "Budi Santoso", salesName: "Rudi Sales", parkingSlot: "A-01", entryDate: "2026-09-10T08:30", pdiStatus: "Ready Delivery" },
+                { vin: "MHKSK98765432102", engine: "1GD-FTV991", model: "Fortuner 2.8 GR", color: "Attitude Black", customerName: "PT Sukses Mandiri", salesName: "Andi Sales", parkingSlot: "A-02", entryDate: "2026-09-11T10:15", pdiStatus: "Proses PDI" }
             ];
             renderStockTable();
             populateOkkVinDropdown();
@@ -585,7 +580,7 @@
             const filterStatus = document.getElementById('filterStatus')?.value || 'ALL';
 
             const filtered = stockData.filter(item => {
-                const matchesSearch = !search || [item.vin, item.model, item.color, item.parkingSlot]
+                const matchesSearch = !search || [item.vin, item.model, item.color, item.customerName, item.salesName, item.parkingSlot]
                     .some(v => String(v || '').toLowerCase().includes(search));
                 const matchesStatus = filterStatus === 'ALL' || item.pdiStatus === filterStatus;
                 return matchesSearch && matchesStatus;
@@ -596,11 +591,12 @@
                     <td class="p-3.5 font-mono font-bold text-slate-900">${item.vin}</td>
                     <td class="p-3.5 font-bold">${item.model}</td>
                     <td class="p-3.5">${item.color}</td>
+                    <td class="p-3.5 font-semibold text-slate-800">${item.customerName || '-'}</td>
+                    <td class="p-3.5 font-semibold text-slate-700">${item.salesName || '-'}</td>
                     <td class="p-3.5 font-bold text-red-600">${item.parkingSlot}</td>
-                    <td class="p-3.5 text-xs">${item.entryDate ? String(item.entryDate).slice(0,10) : '-'}</td>
                     <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">${item.pdiStatus}</span></td>
                     <td class="p-3.5 text-center">
-                        <button onclick="openOKKForVin('${item.vin}')" class="px-2 py-1 bg-blue-600 text-white rounded text-xs font-bold">OKK</button>
+                        <button onclick="openOKKForVin('${item.vin}')" class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-bold">OKK</button>
                     </td>
                 </tr>
             `).join('');
@@ -611,7 +607,7 @@
             const sel = document.getElementById('okkVinSelect');
             const activeUnits = stockData.filter(u => u.pdiStatus !== 'Sudah Keluar');
             sel.innerHTML = '<option value="">-- Pilih No Rangka --</option>' +
-                activeUnits.map(u => `<option value="${u.vin}">${u.vin} - ${u.model}</option>`).join('');
+                activeUnits.map(u => `<option value="${u.vin}">${u.vin} - ${u.model} (${u.customerName || 'No Customer'})</option>`).join('');
         }
 
         function loadOkkVinData() {
@@ -619,8 +615,12 @@
             const unit = stockData.find(u => u.vin === vin);
             if (unit) {
                 document.getElementById('infoOkkModel').textContent = unit.model;
-                document.getElementById('infoOkkEngine').textContent = unit.engine || '-';
+                document.getElementById('infoOkkCustomer').textContent = unit.customerName || '-';
+                document.getElementById('infoOkkSales').textContent = unit.salesName || '-';
                 document.getElementById('infoOkkSlot').textContent = unit.parkingSlot;
+
+                document.getElementById('okkFormCustomer').value = unit.customerName || '';
+                document.getElementById('okkFormSales').value = unit.salesName || '';
                 document.getElementById('okkUnitInfoBox').classList.remove('hidden');
             } else {
                 document.getElementById('okkUnitInfoBox').classList.add('hidden');
@@ -633,10 +633,6 @@
             loadOkkVinData();
         }
 
-        // ===================== OKK: PREVIEW + SAVE & PRINT (FIXED) =====================
-        // Previously referenced by the form's onsubmit/onclick but never defined,
-        // so clicking "Preview Form OKK" or "Cetak & Simpan OKK" silently did nothing.
-
         function readOkkFormData() {
             const vin = document.getElementById('okkVinSelect').value;
             const unit = stockData.find(u => u.vin === vin);
@@ -644,6 +640,8 @@
                 number: document.getElementById('okkFormNumber').value.trim(),
                 date: document.getElementById('okkFormDate').value,
                 origin: document.getElementById('okkFormOrigin').value.trim(),
+                customerName: document.getElementById('okkFormCustomer').value.trim(),
+                salesName: document.getElementById('okkFormSales').value.trim(),
                 transporter: document.getElementById('okkFormTransporter').value.trim(),
                 ownerBranch: document.getElementById('okkFormOwnerBranch').value.trim(),
                 destination: document.getElementById('okkFormDestination').value.trim(),
@@ -664,6 +662,8 @@
             document.getElementById('previewOkkNo').textContent = data.number || '-';
             document.getElementById('previewOkkDate').textContent = formatTanggalID(data.date);
             document.getElementById('previewOkkModel').textContent = data.model || '-';
+            document.getElementById('previewOkkCustomer').textContent = data.customerName || '-';
+            document.getElementById('previewOkkSales').textContent = data.salesName || '-';
             document.getElementById('previewOkkTransporter').textContent = data.transporter || '-';
             document.getElementById('previewOkkVin').textContent = data.vin || '-';
             document.getElementById('previewOkkDestination').textContent = data.destination || '-';
@@ -714,14 +714,12 @@
                 if (GAS_API_URL) {
                     await postToApi('saveOKK', data);
                 } else {
-                    // Offline demo mode: keep it in memory so the history still reflects the save.
                     okkHistoryData.push({ ...data, CreatedAt: new Date().toISOString() });
                 }
 
                 fillOkkPreview(data);
                 document.getElementById('modalOKK').classList.remove('hidden');
 
-                // Give the modal a moment to paint before invoking the print dialog.
                 setTimeout(() => window.print(), 300);
 
                 document.getElementById('formOkk').reset();
@@ -752,6 +750,8 @@
                 model: document.getElementById('addModel').value.trim(),
                 engine: document.getElementById('addEngine').value.trim(),
                 color: document.getElementById('addColor').value.trim(),
+                customerName: document.getElementById('addCustomerName').value.trim(),
+                salesName: document.getElementById('addSalesName').value.trim(),
                 parkingSlot: document.getElementById('addParkingSlot').value.trim(),
                 pdiStatus: document.getElementById('addPdiStatus').value
             };
@@ -774,7 +774,7 @@
             }
         }
 
-        // ===================== BULK UPLOAD (NEW) =====================
+        // ===================== BULK UPLOAD FITUR =====================
         function openBulkUploadModal() {
             bulkParsedRows = [];
             document.getElementById('bulkFileInput').value = '';
@@ -786,8 +786,8 @@
         }
 
         function downloadBulkTemplate() {
-            const header = 'vin,engine,model,color,parkingSlot,entryDate,pdiStatus,notes';
-            const sample = 'MHKSK00000000001,1NR-FE001,Avanza 1.5 G CVT,White,C-01,2026-09-15,Belum PDI,Contoh baris';
+            const header = 'vin,engine,model,color,customerName,salesName,parkingSlot,entryDate,pdiStatus,notes';
+            const sample = 'MHKSK00000000001,1NR-FE001,Avanza 1.5 G CVT,White,Budi Santoso,Rudi Sales,C-01,2026-09-15,Belum PDI,Unit Pesanan Baru';
             const csv = header + '\n' + sample + '\n';
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -811,17 +811,18 @@
                 skipEmptyLines: true,
                 transformHeader: h => h.trim(),
                 complete: function(results) {
-                    // Normalize + drop rows that are entirely blank
                     bulkParsedRows = (results.data || [])
                         .map(row => ({
-                            vin: (row.vin || '').trim(),
-                            engine: (row.engine || '').trim(),
-                            model: (row.model || '').trim(),
-                            color: (row.color || '').trim(),
-                            parkingSlot: (row.parkingSlot || '').trim(),
-                            entryDate: (row.entryDate || '').trim(),
-                            pdiStatus: (row.pdiStatus || '').trim(),
-                            notes: (row.notes || '').trim()
+                            vin: (row.vin || row.VIN || '').trim(),
+                            engine: (row.engine || row.Engine || '').trim(),
+                            model: (row.model || row.Model || '').trim(),
+                            color: (row.color || row.Color || '').trim(),
+                            customerName: (row.customerName || row.customer_name || row.customer || '').trim(),
+                            salesName: (row.salesName || row.sales_name || row.sales || '').trim(),
+                            parkingSlot: (row.parkingSlot || row.parking_slot || row.slot || '').trim(),
+                            entryDate: (row.entryDate || row.entry_date || '').trim(),
+                            pdiStatus: (row.pdiStatus || row.pdi_status || '').trim(),
+                            notes: (row.notes || row.Notes || '').trim()
                         }))
                         .filter(row => row.vin || row.model);
 
@@ -850,9 +851,11 @@
             document.getElementById('bulkPreviewCount').textContent = bulkParsedRows.length;
             body.innerHTML = bulkParsedRows.map(r => `
                 <tr>
-                    <td class="p-2 font-mono">${r.vin || '<span class="text-red-500">(kosong)</span>'}</td>
-                    <td class="p-2">${r.model || '<span class="text-red-500">(kosong)</span>'}</td>
+                    <td class="p-2 font-mono font-bold">${r.vin || '<span class="text-red-500">(kosong)</span>'}</td>
+                    <td class="p-2 font-bold">${r.model || '<span class="text-red-500">(kosong)</span>'}</td>
                     <td class="p-2">${r.color || '-'}</td>
+                    <td class="p-2 font-semibold text-slate-800">${r.customerName || '-'}</td>
+                    <td class="p-2 font-semibold text-slate-700">${r.salesName || '-'}</td>
                     <td class="p-2">${r.parkingSlot || '-'}</td>
                     <td class="p-2">${r.pdiStatus || 'Belum PDI'}</td>
                 </tr>
@@ -873,7 +876,6 @@
                 if (GAS_API_URL) {
                     result = await postToApi('bulkAddStock', { items: bulkParsedRows });
                 } else {
-                    // Offline demo mode: replicate the same dedup logic locally.
                     result = bulkUploadOffline(bulkParsedRows);
                 }
 
@@ -901,7 +903,6 @@
             }
         }
 
-        // Mirrors handleBulkAddStock() in Code.gs so Bulk Upload also works in offline demo mode.
         function bulkUploadOffline(items) {
             const existingVins = new Set(stockData.map(s => String(s.vin).trim().toUpperCase()));
             const seenInBatch = new Set();
@@ -922,6 +923,8 @@
                     engine: data.engine || '-',
                     model: data.model,
                     color: data.color || '-',
+                    customerName: data.customerName || '-',
+                    salesName: data.salesName || '-',
                     parkingSlot: data.parkingSlot || '-',
                     entryDate: data.entryDate || timestamp,
                     pdiStatus: data.pdiStatus || 'Belum PDI',
