@@ -187,7 +187,7 @@
             </div>
 
             <div class="bg-slate-900 p-6 rounded-2xl shadow-inner border border-slate-800">
-                <div id="yardGridContainer" class="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-19 gap-2"></div>
+                <div id="yardGridContainer" class="grid grid-cols-5 sm:grid-cols-10 lg:grid-cols-[repeat(19,minmax(0,1fr))] gap-2"></div>
             </div>
         </div>
 
@@ -620,17 +620,17 @@
             document.getElementById('badgeTotalStock').textContent = stockData.length;
         }
 
-        // ===================== DENAH YARD MAP (1 - 190) =====================
         function renderYardMap() {
             const container = document.getElementById('yardGridContainer');
             if (!container) return;
 
             let html = '';
-            const activeStock = stockData.filter(u => u.pdiStatus !== 'Sudah Keluar');
+            const activeStock = stockData.filter(u => String(u.pdiStatus || '').trim() !== 'Sudah Keluar');
 
             for (let i = 1; i <= 190; i++) {
                 const unit = activeStock.find(u => {
-                    const slotStr = String(u.parkingSlot || '').trim().toLowerCase();
+                    if (!u.parkingSlot) return false;
+                    const slotStr = String(u.parkingSlot).trim();
                     const cleanNum = slotStr.replace(/\D/g, '');
                     return cleanNum === String(i) || slotStr === String(i);
                 });
@@ -665,9 +665,10 @@
 
         function openSlotDetail(slotNumber) {
             const unit = stockData.find(u => {
-                const slotStr = String(u.parkingSlot || '').trim().toLowerCase();
+                if (!u.parkingSlot) return false;
+                const slotStr = String(u.parkingSlot).trim();
                 const cleanNum = slotStr.replace(/\D/g, '');
-                return (cleanNum === String(slotNumber) || slotStr === String(slotNumber)) && u.pdiStatus !== 'Sudah Keluar';
+                return (cleanNum === String(slotNumber) || slotStr === String(slotNumber)) && String(u.pdiStatus).trim() !== 'Sudah Keluar';
             });
 
             document.getElementById('slotDetailTitle').textContent = `#${slotNumber}`;
@@ -698,7 +699,7 @@
 
         function populateOkkVinDropdown() {
             const sel = document.getElementById('okkVinSelect');
-            const activeUnits = stockData.filter(u => u.pdiStatus !== 'Sudah Keluar');
+            const activeUnits = stockData.filter(u => String(u.pdiStatus).trim() !== 'Sudah Keluar');
             sel.innerHTML = '<option value="">-- Pilih No Rangka --</option>' +
                 activeUnits.map(u => `<option value="${u.vin}">${u.vin} - ${u.model} (${u.customerName})</option>`).join('');
         }
@@ -820,7 +821,7 @@
             } catch (e) {
                 errBox.textContent = 'Gagal menyimpan OKK: ' + e.message;
                 errBox.classList.remove('hidden');
-            } font-extrabold {
+            } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Cetak & Simpan OKK';
             }
@@ -1030,7 +1031,7 @@
         }
 
         function renderDashboard() {
-            const inYard = stockData.filter(s => s.pdiStatus !== 'Sudah Keluar');
+            const inYard = stockData.filter(s => String(s.pdiStatus || '').trim() !== 'Sudah Keluar');
             document.getElementById('dashTotalInYard').textContent = inYard.length;
             document.getElementById('dashReadyDelivery').textContent = stockData.filter(s => s.pdiStatus === 'Ready Delivery').length;
             document.getElementById('dashProsesPdi').textContent = stockData.filter(s => s.pdiStatus === 'Proses PDI').length;
