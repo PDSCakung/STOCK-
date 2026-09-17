@@ -595,7 +595,10 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        var API_URL = localStorage.getItem("https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec") || "";
+        // Setup API otomatis terhubung (Diubah dari kode asli untuk fixing auto-connect)
+        var DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec";
+        var API_URL = localStorage.getItem("DAYA_TOYOTA_API_URL") || DEFAULT_API_URL;
+        
         var sampleStockData = [];
         var yardSlotsData = [];
         var opnameScanResults = [];
