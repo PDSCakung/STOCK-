@@ -36,8 +36,17 @@
         .slot-box { transition: all 0.2s ease-in-out; }
         .slot-box:hover { transform: scale(1.05); cursor: pointer; }
         
-        /* FIX LAYOUT CETAK / PRINT */
+        /* OPTIMISASI PRINT KHUSUS CONTINUOUS FORM */
         @media print {
+            @page {
+                size: auto;
+                margin: 4mm 6mm; /* Margin tipis cocok untuk printer dot matrix / continuous feed */
+            }
+            body { 
+                background-color: white !important; 
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
             .no-print { display: none !important; }
             body * { visibility: hidden !important; }
             .printable-active, .printable-active * { visibility: visible !important; }
@@ -49,6 +58,17 @@
                 margin: 0 !important; 
                 padding: 10px !important; 
                 background: white !important;
+                border: 1px solid #000 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                font-size: 10px !important;
+                line-height: 1.25 !important;
+            }
+            .printable-active table, .printable-active td, .printable-active th {
+                border-color: #000 !important;
+            }
+            .printable-active .h-12 {
+                height: 2rem !important; /* Mempersingkat ruang TTD agar muat 1 lembar continuous */
             }
         }
     </style>
@@ -224,7 +244,7 @@
             </div>
         </div>
 
-        <!-- MODAL DETAIL SLOT YARD (BARU) -->
+        <!-- MODAL DETAIL SLOT YARD -->
         <div id="modal-yard-detail" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 no-print">
             <div class="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
                 <div class="flex justify-between items-center border-b pb-2">
@@ -494,29 +514,33 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                     <button onclick="fetchOkkUnitData()" class="bg-toyota-red text-white px-4 py-2 rounded-lg text-xs font-bold">Tarik Data Unit</button>
                 </div>
 
-                <!-- INPUT EXTRA FOR OKK -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-3 rounded-lg text-xs no-print">
+                <!-- INPUT EXTRA FOR OKK (EDITABLE LOKASI ASAL) -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-gray-50 p-3 rounded-lg text-xs no-print">
+                    <div>
+                        <label class="block font-bold mb-1">Lokasi Asal:</label>
+                        <input type="text" id="okk-input-asal" value="DAYA TOYOTA CAKUNG" placeholder="Lokasi Asal" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
+                    </div>
                     <div>
                         <label class="block font-bold mb-1">Driver / Supir:</label>
-                        <input type="text" id="okk-input-driver" placeholder="Nama Supir" class="w-full p-1.5 border rounded">
+                        <input type="text" id="okk-input-driver" placeholder="Nama Supir" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
                     </div>
                     <div>
                         <label class="block font-bold mb-1">Tujuan Pengiriman:</label>
-                        <input type="text" id="okk-input-tujuan" placeholder="Alamat / Cabang" class="w-full p-1.5 border rounded">
+                        <input type="text" id="okk-input-tujuan" placeholder="Alamat / Cabang" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
                     </div>
                     <div>
                         <label class="block font-bold mb-1">KM Awal / Akhir:</label>
-                        <input type="text" id="okk-input-km" placeholder="Contoh: 10 / 45" class="w-full p-1.5 border rounded">
+                        <input type="text" id="okk-input-km" placeholder="Contoh: 10 / 45" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
                     </div>
                     <div>
                         <label class="block font-bold mb-1">BBM & Tol:</label>
-                        <input type="text" id="okk-input-bbm" placeholder="Contoh: 15 L / Rp 50k" class="w-full p-1.5 border rounded">
+                        <input type="text" id="okk-input-bbm" placeholder="Contoh: 15 L / Rp 50k" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
                     </div>
                 </div>
 
-                <!-- PRINTABLE OKK AREA -->
-                <div id="printable-okk-area" class="border border-gray-300 p-6 rounded-lg bg-white space-y-4 text-xs font-sans text-gray-800">
-                    <div class="flex justify-between items-start border-b pb-3">
+                <!-- PRINTABLE OKK AREA (DESAIN PAS UTK CONTINUOUS FORM) -->
+                <div id="printable-okk-area" class="border border-gray-300 p-5 rounded-lg bg-white space-y-3 text-xs font-sans text-gray-800">
+                    <div class="flex justify-between items-start border-b pb-2">
                         <div>
                             <h2 class="font-extrabold text-base tracking-wide text-gray-900">PT DAYA ADICIPTA SANDIKA</h2>
                             <p class="font-bold text-xs text-gray-700">DAYA TOYOTA CAKUNG</p>
@@ -527,11 +551,11 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                             <h3 class="font-extrabold text-sm uppercase tracking-wider text-toyota-red">ORDER KIRIM KENDARAAN</h3>
                             <p class="text-xs font-bold mt-1">NOMOR: <span id="okk-nomor">DAS/OKK/20260916/0001</span></p>
                             <p class="text-xs">TANGGAL: <span id="okk-tanggal">16. Sep. 2026</span></p>
-                            <p class="text-xs">LOKASI ASAL: <span id="okk-asal">DAYA TOYOTA CAKUNG</span></p>
+                            <p class="text-xs">LOKASI ASAL: <span id="okk-asal" class="font-bold">DAYA TOYOTA CAKUNG</span></p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 border-b pb-3">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-2">
                         <div>
                             <p class="mb-1"><b>Kepada:</b> <span id="okk-customer">PT. PARANI ARTAMANDIRI</span></p>
                             <p><b>Tipe Unit:</b> <span id="okk-tipe">HILUX 2.8G DOUBLE CABIN 4x4</span></p>
@@ -546,10 +570,10 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 border-b pb-3">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-2">
                         <div>
                             <p class="font-bold mb-1">Perlengkapan Standard:</p>
-                            <ul class="text-[11px] space-y-0.5">
+                            <ul class="text-[10px] grid grid-cols-2 gap-x-1 gap-y-0.5">
                                 <li>1. Toolset + Kunci Roda</li>
                                 <li>2. Jack + handle</li>
                                 <li>3. Ban Serep</li>
@@ -568,31 +592,31 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-2 text-center text-[10px] pt-4">
+                    <div class="grid grid-cols-4 gap-2 text-center text-[10px] pt-2">
                         <div>
                             <p class="font-bold">Diserahkan Oleh:</p>
-                            <div class="h-12"></div>
+                            <div class="h-10"></div>
                             <p>Tanggal: ________</p>
                         </div>
                         <div>
                             <p class="font-bold">Dikirim Oleh:</p>
-                            <div class="h-12"></div>
+                            <div class="h-10"></div>
                             <p>Tanggal: ________</p>
                         </div>
                         <div>
                             <p class="font-bold">Diterima Oleh:</p>
-                            <div class="h-12"></div>
+                            <div class="h-10"></div>
                             <p>Tanggal: ________</p>
                         </div>
                         <div>
                             <p class="font-bold">Menyetujui,</p>
                             <p class="text-[9px]">Kepala Administrasi</p>
-                            <div class="h-8"></div>
+                            <div class="h-6"></div>
                             <p class="font-bold border-t pt-1">ANTO PRIATNA</p>
                         </div>
                     </div>
 
-                    <div class="border-t pt-2 text-[9px] text-gray-500 italic flex justify-between">
+                    <div class="border-t pt-1.5 text-[9px] text-gray-500 italic flex justify-between">
                         <span>Distribusi: Putih --> DRIVER</span>
                         <span>Merah --> ADM</span>
                         <span>Kuning --> PDS</span>
@@ -850,7 +874,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             }
         }
 
-        // FUNGSI POPUP DETAIL YARD SLOT
         function openYardSlotDetail(slotNum) {
             var slotObj = yardSlotsData.find(s => s.slotId == slotNum);
             var isOccupied = slotObj ? (slotObj.status === "Stock Ada" || slotObj.status === "Terisi") : false;
@@ -1051,7 +1074,21 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             a.click();
         }
 
-        // ORDER KIRIM KENDARAAN (OKK)
+        // ORDER KIRIM KENDARAAN (OKK) & UPDATE LIVE PREVIEW
+        function updateOkkPreview() {
+            var asal = document.getElementById("okk-input-asal").value.trim() || "DAYA TOYOTA CAKUNG";
+            var driver = document.getElementById("okk-input-driver").value.trim() || "-";
+            var tujuan = document.getElementById("okk-input-tujuan").value.trim() || "-";
+            var km = document.getElementById("okk-input-km").value.trim() || "-";
+            var bbm = document.getElementById("okk-input-bbm").value.trim() || "-";
+
+            document.getElementById("okk-asal").innerText = asal;
+            document.getElementById("disp-driver").innerText = driver;
+            document.getElementById("okk-tujuan").innerText = tujuan;
+            document.getElementById("disp-km").innerText = km;
+            document.getElementById("disp-bbm").innerText = bbm;
+        }
+
         function fetchOkkUnitData() {
             var vin = document.getElementById("okk-vin-input").value.trim();
             if (!vin) { alert("Masukkan No. Rangka terlebih dahulu!"); return; }
@@ -1072,6 +1109,8 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                             .then(data => {
                                 if (data.okkNo) document.getElementById("okk-nomor").innerText = data.okkNo;
                             });
+                        
+                        updateOkkPreview();
                     } else {
                         alert(res.message || "Data unit tidak ditemukan.");
                     }
@@ -1081,23 +1120,22 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
 
         function saveOrderKirimData() {
             var vin = document.getElementById("okk-vin").innerText;
-            if (!vin || vin === "MR0HA8AV5T1801922") { alert("Tarik data unit terlebih dahulu!"); return; }
+            if (!vin || vin === "MR0HA8AV5T1801922" || vin === "-") { alert("Tarik data unit terlebih dahulu!"); return; }
 
-            var driver = document.getElementById("okk-input-driver").value;
-            var tujuan = document.getElementById("okk-input-tujuan").value;
-            var km = document.getElementById("okk-input-km").value;
-            var bbm = document.getElementById("okk-input-bbm").value;
+            updateOkkPreview();
 
-            document.getElementById("disp-km").innerText = km || "-";
-            document.getElementById("disp-bbm").innerText = bbm || "-";
-            document.getElementById("disp-driver").innerText = driver || "-";
-            if (tujuan) document.getElementById("okk-tujuan").innerText = tujuan;
+            var asal = document.getElementById("okk-input-asal").value.trim() || "DAYA TOYOTA CAKUNG";
+            var driver = document.getElementById("okk-input-driver").value.trim();
+            var tujuan = document.getElementById("okk-input-tujuan").value.trim();
+            var km = document.getElementById("okk-input-km").value.trim();
+            var bbm = document.getElementById("okk-input-bbm").value.trim();
 
             var payload = {
                 action: "saveOrderKirim",
                 noOkk: document.getElementById("okk-nomor").innerText,
                 noRangka: vin,
                 namaCustomer: document.getElementById("okk-customer").innerText,
+                lokasiAsal: asal,
                 tujuanPengiriman: tujuan,
                 driver: driver,
                 kmAwal: km,
@@ -1143,7 +1181,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             });
         }
 
-        // FUNGSI PRINT UNIVERSAL DENGAN ISOLASI PRINTABLE AREA
         function printForm(elementId) {
             var elem = document.getElementById(elementId);
             if (!elem) return;
