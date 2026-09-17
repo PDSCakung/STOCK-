@@ -35,10 +35,21 @@
         body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; }
         .slot-box { transition: all 0.2s ease-in-out; }
         .slot-box:hover { transform: scale(1.05); cursor: pointer; }
+        
+        /* FIX LAYOUT CETAK / PRINT */
         @media print {
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background-color: white !important; }
+            body * { visibility: hidden !important; }
+            .printable-active, .printable-active * { visibility: visible !important; }
+            .printable-active { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important; 
+                margin: 0 !important; 
+                padding: 10px !important; 
+                background: white !important;
+            }
         }
     </style>
 </head>
@@ -67,19 +78,6 @@
             </button>
         </div>
 
-        <!-- CONFIG BAR FOR APPS SCRIPT URL -->
-        <div class="bg-gray-900 border-t border-gray-800 px-4 py-2 text-xs text-gray-300 flex flex-wrap items-center justify-between gap-2 no-print">
-            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                <span class="font-semibold text-toyota-red"><i class="fa-solid fa-plug mr-1"></i> Apps Script Web App URL:</span>
-                <input type="text" id="appscript-url" placeholder="https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec" class="bg-gray-800 border border-gray-700 text-white px-2 py-1 rounded w-full sm:w-96 text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
-                <button onclick="saveApiUrl()" class="bg-toyota-red hover:bg-red-700 text-white px-3 py-1 rounded font-semibold text-xs">Simpan</button>
-            </div>
-            <div class="text-gray-400 text-[10px]">
-                PRD ID: PRD-PDS-2026-002 | Yard Capacity: 190 Slots
-            </div>
-        </div>
-    </header>
-
     <!-- NAVIGATION BAR -->
     <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-28 sm:top-16 z-40 no-print">
         <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -106,7 +104,7 @@
     </nav>
 
     <!-- MAIN CONTENT CONTAINER -->
-    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 no-print">
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
 
         <!-- 1. DASHBOARD TAB -->
         <section id="tab-dashboard" class="tab-content block space-y-6">
@@ -186,7 +184,7 @@
         </section>
 
         <!-- MODAL EDIT TANGGAL MASUK & SLOT YARD -->
-        <div id="modal-edit-unit" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div id="modal-edit-unit" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 no-print">
             <div class="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
                 <div class="flex justify-between items-center border-b pb-2">
                     <h3 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-pen-to-square text-toyota-red mr-1"></i> Edit Tanggal Masuk & Slot Yard</h3>
@@ -209,6 +207,47 @@
                 <div class="flex justify-end space-x-2 pt-2 border-t">
                     <button onclick="closeEditModal()" class="px-3 py-1.5 bg-gray-200 text-gray-700 rounded text-xs font-bold hover:bg-gray-300">Batal</button>
                     <button onclick="saveUnitEdit()" class="px-4 py-1.5 bg-toyota-red text-white rounded text-xs font-bold hover:bg-red-700">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DETAIL SLOT YARD (BARU) -->
+        <div id="modal-yard-detail" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 no-print">
+            <div class="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h3 class="font-bold text-gray-900 text-sm"><i class="fa-solid fa-warehouse text-toyota-red mr-1"></i> Informasi Detail Slot Yard</h3>
+                    <button onclick="closeYardDetailModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+                <div class="space-y-3 text-xs">
+                    <div class="bg-gray-50 p-3 rounded-lg border space-y-2">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="font-bold text-gray-600">Nomor Parkir / Slot:</span>
+                            <span id="yard-modal-slot" class="font-extrabold text-toyota-red text-base">Slot -</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-600">Status Slot:</span>
+                            <span id="yard-modal-status" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-200 text-gray-800">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-600">No. Rangka (VIN):</span>
+                            <span id="yard-modal-vin" class="font-mono font-bold text-gray-900">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-600">Tipe Unit:</span>
+                            <span id="yard-modal-tipe" class="font-semibold text-gray-800">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-600">Warna:</span>
+                            <span id="yard-modal-warna" class="text-gray-700">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-600">Nama Customer:</span>
+                            <span id="yard-modal-customer" class="text-gray-700 truncate max-w-[180px]">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-2 border-t">
+                    <button onclick="closeYardDetailModal()" class="px-4 py-1.5 bg-gray-800 text-white rounded text-xs font-bold hover:bg-black">Tutup</button>
                 </div>
             </div>
         </div>
@@ -254,7 +293,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                 <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div>
                         <h2 class="font-bold text-lg text-gray-900"><i class="fa-solid fa-warehouse text-toyota-red mr-2"></i> Map Yard (Denah Area Parkir Slot 1 - 190)</h2>
-                        <p class="text-xs text-gray-500">Total Kapasitas: 190 Slot Parkir Daya Toyota Cakung</p>
+                        <p class="text-xs text-gray-500">Klik slot parkir mana saja untuk melihat Detail No. Rangka, Tipe Unit, Warna, dan Customer</p>
                     </div>
 
                     <div class="flex items-center space-x-2 w-full sm:w-auto">
@@ -285,7 +324,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
         <!-- 4. CHECKSHEET PDI TAB (FM-LOG-001) -->
         <section id="tab-checksheet" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b pb-3">
+                <div class="flex items-center justify-between border-b pb-3 no-print">
                     <div>
                         <h2 class="font-bold text-lg text-gray-900">Check Sheet Kendaraan Baru (Pre-Delivery Inspection)</h2>
                         <p class="text-xs text-gray-500">Standar Form Resmi: FM-LOG-001 (92 Item Inspeksi)</p>
@@ -301,7 +340,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                 </div>
 
                 <!-- VIN SEARCH FOR PDI -->
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 no-print">
                     <input type="text" id="pdi-vin-input" placeholder="Masukkan 5 Digit / Full No. Rangka (VIN)..." class="p-2 border border-gray-300 rounded-lg text-xs w-72 focus:ring-1 focus:ring-toyota-red focus:outline-none">
                     <button onclick="fetchPdiUnitData()" class="bg-toyota-red text-white px-4 py-2 rounded-lg text-xs font-bold">Tarik Data Unit</button>
                 </div>
@@ -349,7 +388,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             </div>
         </section>
 
-        <!-- 5. STOCK OPNAME QR TAB (NEW) -->
+        <!-- 5. STOCK OPNAME QR TAB -->
         <section id="tab-stockopname" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-3 gap-3">
@@ -368,7 +407,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- SCANNER & MANUAL INPUT -->
                     <div class="space-y-4">
                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
                             <h3 class="font-bold text-xs uppercase text-gray-700">1. Mode Scan Kamera / QR Reader</h3>
@@ -394,7 +432,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         </div>
                     </div>
 
-                    <!-- REKAPITULASI HASIL OPNAME -->
                     <div class="md:col-span-2 space-y-3">
                         <h3 class="font-bold text-sm text-gray-900">Hasil Scan Audit Stock Opname</h3>
                         <div class="overflow-x-auto border rounded-lg">
@@ -423,7 +460,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
         <!-- 6. ORDER KIRIM KENDARAAN TAB -->
         <section id="tab-orderkirim" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b pb-3">
+                <div class="flex items-center justify-between border-b pb-3 no-print">
                     <div>
                         <h2 class="font-bold text-lg text-gray-900">Surat Order Kirim Kendaraan</h2>
                         <p class="text-xs text-gray-500">Format Resmi PT Daya Adicipta Sandika - Daya Toyota Cakung</p>
@@ -439,13 +476,13 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                 </div>
 
                 <!-- VIN SEARCH FOR ORDER KIRIM -->
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 no-print">
                     <input type="text" id="okk-vin-input" placeholder="Cari No. Rangka Kendaraan..." class="p-2 border border-gray-300 rounded-lg text-xs w-72 focus:ring-1 focus:ring-toyota-red focus:outline-none">
                     <button onclick="fetchOkkUnitData()" class="bg-toyota-red text-white px-4 py-2 rounded-lg text-xs font-bold">Tarik Data Unit</button>
                 </div>
 
                 <!-- INPUT EXTRA FOR OKK -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-3 rounded-lg text-xs">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50 p-3 rounded-lg text-xs no-print">
                     <div>
                         <label class="block font-bold mb-1">Driver / Supir:</label>
                         <input type="text" id="okk-input-driver" placeholder="Nama Supir" class="w-full p-1.5 border rounded">
@@ -496,7 +533,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         </div>
                     </div>
 
-                    <!-- CHECKLIST & PARAMETERS -->
                     <div class="grid grid-cols-2 gap-4 border-b pb-3">
                         <div>
                             <p class="font-bold mb-1">Perlengkapan Standard:</p>
@@ -519,7 +555,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         </div>
                     </div>
 
-                    <!-- SIGNATURE BLOCK -->
                     <div class="grid grid-cols-4 gap-2 text-center text-[10px] pt-4">
                         <div>
                             <p class="font-bold">Diserahkan Oleh:</p>
@@ -595,7 +630,6 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        // Setup API otomatis terhubung (Diubah dari kode asli untuk fixing auto-connect)
         var DEFAULT_API_URL = "https://script.google.com/macros/s/AKfycbzh0VDNWBx4luHLNKaaxG61SGnIxp98kN3vARnRIrQ76IpWnIFPUhAhoS7WKsPhhkmS/exec";
         var API_URL = localStorage.getItem("DAYA_TOYOTA_API_URL") || DEFAULT_API_URL;
         
@@ -778,6 +812,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             });
         }
 
+        // RENDER YARD MAP + CLICK EVENT UNTUK DETAIL SLOT
         function renderYardMap() {
             var grid = document.getElementById("yard-grid");
             grid.innerHTML = "";
@@ -793,12 +828,44 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
 
                 var div = document.createElement("div");
                 div.className = `slot-box border rounded p-1.5 text-center text-[10px] font-bold ${isOccupied ? 'bg-red-500 text-white border-red-600' : 'bg-green-100 text-green-800 border-green-300'}`;
+                div.setAttribute("onclick", `openYardSlotDetail(${i})`);
                 div.innerHTML = `
                     <div>S-${i}</div>
                     <div class="text-[8px] font-normal opacity-90 truncate">${isOccupied ? (vinInSlot ? vinInSlot.slice(-5) : 'Terisi') : 'Kosong'}</div>
                 `;
                 grid.appendChild(div);
             }
+        }
+
+        // FUNGSI POPUP DETAIL YARD SLOT
+        function openYardSlotDetail(slotNum) {
+            var slotObj = yardSlotsData.find(s => s.slotId == slotNum);
+            var isOccupied = slotObj ? (slotObj.status === "Stock Ada" || slotObj.status === "Terisi") : false;
+            var vin = slotObj ? slotObj.noRangka : "";
+
+            var unitDetail = sampleStockData.find(u => u.noRangka && vin && (u.noRangka.toUpperCase() === vin.toUpperCase() || u.noRangka.toUpperCase().endsWith(vin.toUpperCase())));
+
+            document.getElementById("yard-modal-slot").innerText = "Slot " + slotNum;
+
+            var statusSpan = document.getElementById("yard-modal-status");
+            if (isOccupied) {
+                statusSpan.innerText = "Stock Ada (Terisi)";
+                statusSpan.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800";
+            } else {
+                statusSpan.innerText = "Kosong (Ready)";
+                statusSpan.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800";
+            }
+
+            document.getElementById("yard-modal-vin").innerText = vin || "-";
+            document.getElementById("yard-modal-tipe").innerText = unitDetail ? (unitDetail.tipeUnit || "-") : "-";
+            document.getElementById("yard-modal-warna").innerText = unitDetail ? (unitDetail.warna || "-") : "-";
+            document.getElementById("yard-modal-customer").innerText = unitDetail ? (unitDetail.namaCustomer || "-") : "-";
+
+            document.getElementById("modal-yard-detail").classList.remove("hidden");
+        }
+
+        function closeYardDetailModal() {
+            document.getElementById("modal-yard-detail").classList.add("hidden");
         }
 
         function parseAndUploadBulk() {
@@ -1063,8 +1130,14 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             });
         }
 
+        // FUNGSI PRINT UNIVERSAL DENGAN ISOLASI PRINTABLE AREA
         function printForm(elementId) {
+            var elem = document.getElementById(elementId);
+            if (!elem) return;
+            
+            elem.classList.add('printable-active');
             window.print();
+            elem.classList.remove('printable-active');
         }
     </script>
 </body>
