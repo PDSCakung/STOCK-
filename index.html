@@ -38,7 +38,7 @@
         .slot-box { transition: all 0.2s ease-in-out; }
         .slot-box:hover { transform: scale(1.05); cursor: pointer; }
         
-        /* OPTIMISASI CETAK TAJAM TANPA BURAM & POSISI TOP 2 CM */
+        /* OPTIMISASI CETAK TAJAM: TOP 2 CM & GESER KANAN +1.5 CM (LEFT 20 MM) */
         @media print {
             @page {
                 size: auto;
@@ -66,9 +66,9 @@
             }
             .printable-active { 
                 position: absolute !important; 
-                left: 5mm !important; 
-                top: 2cm !important; /* POSISI CETAK DITURUNKAN TEPAT 2 CM */
-                width: 195mm !important; 
+                left: 20mm !important; /* DIGESER KE KANAN 1.5 CM (5mm + 15mm = 20mm) */
+                top: 2cm !important;  /* POSISI CETAK ATAS 2 CM */
+                width: 180mm !important; /* DISESUAIKAN AGAR MUAT PAS DI KERTAS CONTINUOUS / A4 */
                 margin: 0 !important; 
                 padding: 5mm !important; 
                 background: #ffffff !important;
@@ -577,7 +577,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                     </div>
                 </div>
 
-                <!-- PRINTABLE OKK AREA (DESAIN TAJAM UTK CONTINUOUS FORM & PRESISI TOP 2 CM) -->
+                <!-- PRINTABLE OKK AREA (DESAIN TAJAM UTK CONTINUOUS FORM & PRESISI TOP 2 CM & GESER KANAN 1.5 CM) -->
                 <div id="printable-okk-area" class="border border-gray-300 p-5 rounded-lg bg-white space-y-3 text-xs font-sans text-gray-800">
                     <div class="flex justify-between items-start border-b pb-2">
                         <div>
@@ -727,6 +727,19 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             }
         });
 
+        // FUNGSI UNTUK MENGAMBIL NOMOR OKK DARI BACKEND GOOGLE APPS SCRIPT
+        function fetchOkkNumber() {
+            if (!API_URL) return;
+            fetch(API_URL + "?action=generateOkkNumber")
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.okkNo) {
+                        document.getElementById("okk-nomor").innerText = data.okkNo;
+                    }
+                })
+                .catch(err => console.error("Gagal mengambil nomor OKK:", err));
+        }
+
         // FUNGSI UNTUK MENGAMBIL TANGGAL HARI INI SECARA OTOMATIS
         function setTodayDateForOkk() {
             var today = new Date();
@@ -807,6 +820,10 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             });
             var activeBtn = document.getElementById('nav-' + tabId);
             if (activeBtn) activeBtn.className = 'nav-btn bg-toyota-red text-white px-3 py-2 rounded-md transition';
+
+            if (tabId === 'orderkirim') {
+                fetchOkkNumber();
+            }
         }
 
         function toggleMobileMenu() {
@@ -1170,12 +1187,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
 
                         document.getElementById("okk-aksesoris").innerText = res.data.namaSales || "-";
                         
-                        fetch(API_URL + "?action=generateOkkNumber")
-                            .then(r => r.json())
-                            .then(data => {
-                                if (data.okkNo) document.getElementById("okk-nomor").innerText = data.okkNo;
-                            });
-                        
+                        fetchOkkNumber();
                         updateOkkPreview();
                     } else {
                         alert(res.message || "Data unit tidak ditemukan.");
@@ -1213,7 +1225,10 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                 body: JSON.stringify(payload)
             })
             .then(res => res.json())
-            .then(res => alert(res.message))
+            .then(res => {
+                alert(res.message);
+                fetchOkkNumber();
+            })
             .catch(err => alert("Gagal menyimpan Surat Order Kirim."));
         }
 
@@ -1247,7 +1262,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             });
         }
 
-        // FUNGSI UNTUK MENCETAK KE PRINTER (MARGIN TOP 2 CM)
+        // FUNGSI UNTUK MENCETAK KE PRINTER (MARGIN TOP 2 CM & GESER KANAN 1.5 CM)
         function printForm(elementId) {
             var elem = document.getElementById(elementId);
             if (!elem) return;
