@@ -549,8 +549,12 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                     <button onclick="fetchOkkUnitData()" class="bg-toyota-red text-white px-4 py-2 rounded-lg text-xs font-bold">Tarik Data Unit</button>
                 </div>
 
-                <!-- INPUT EXTRA FOR OKK (EDITABLE LOKASI ASAL) -->
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-gray-50 p-3 rounded-lg text-xs no-print">
+                <!-- INPUT EXTRA FOR OKK (EDITABLE CUSTOMER & LOKASI ASAL) -->
+                <div class="grid grid-cols-2 sm:grid-cols-6 gap-3 bg-gray-50 p-3 rounded-lg text-xs no-print">
+                    <div>
+                        <label class="block font-bold mb-1">Kepada (Customer):</label>
+                        <input type="text" id="okk-input-customer" value="PT. PARANI ARTAMANDIRI" placeholder="Nama Customer" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
+                    </div>
                     <div>
                         <label class="block font-bold mb-1">Lokasi Asal:</label>
                         <input type="text" id="okk-input-asal" value="DAYA TOYOTA CAKUNG" placeholder="Lokasi Asal" class="w-full p-1.5 border rounded" oninput="updateOkkPreview()">
@@ -584,8 +588,8 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         </div>
                         <div class="text-right">
                             <h3 class="font-extrabold text-sm uppercase tracking-wider text-toyota-red">ORDER KIRIM KENDARAAN</h3>
-                            <p class="text-xs font-bold mt-1">NOMOR: <span id="okk-nomor">DAS/OKK/20260916/0001</span></p>
-                            <p class="text-xs">TANGGAL: <span id="okk-tanggal">16. Sep. 2026</span></p>
+                            <p class="text-xs font-bold mt-1">NOMOR: <span id="okk-nomor">DAS/OKK/20260918/0001</span></p>
+                            <p class="text-xs">TANGGAL: <span id="okk-tanggal">-</span></p>
                             <p class="text-xs">LOKASI ASAL: <span id="okk-asal" class="font-bold">DAYA TOYOTA CAKUNG</span></p>
                         </div>
                     </div>
@@ -684,7 +688,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">No. Surat Order Kirim (OKK):</label>
-                        <input type="text" id="out-okk" placeholder="Contoh: DAS/OKK/20260916/0001" class="w-full p-2 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
+                        <input type="text" id="out-okk" placeholder="Contoh: DAS/OKK/20260918/0001" class="w-full p-2 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
                     </div>
                     <button onclick="submitUnitKeluar()" class="w-full bg-toyota-red hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm">
                         <i class="fa-solid fa-check-double mr-1"></i> Diproses KELUAR & Bebaskan Slot Yard
@@ -711,6 +715,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
         var html5QrCodeScanner = null;
 
         document.addEventListener("DOMContentLoaded", function() {
+            setTodayDateForOkk();
             if (API_URL) {
                 document.getElementById("appscript-url").value = API_URL;
                 checkApiStatus();
@@ -721,6 +726,21 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                 renderYardMap();
             }
         });
+
+        // FUNGSI UNTUK MENGAMBIL TANGGAL HARI INI SECARA OTOMATIS
+        function setTodayDateForOkk() {
+            var today = new Date();
+            var months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+            var day = ("0" + today.getDate()).slice(-2);
+            var month = months[today.getMonth()];
+            var year = today.getFullYear();
+            var formattedDate = day + ". " + month + ". " + year;
+            
+            var okkDateElem = document.getElementById("okk-tanggal");
+            if (okkDateElem) {
+                okkDateElem.innerText = formattedDate;
+            }
+        }
 
         function saveApiUrl() {
             var url = document.getElementById("appscript-url").value.trim();
@@ -930,7 +950,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
             document.getElementById("yard-modal-vin").innerText = vin || "-";
             document.getElementById("yard-modal-tipe").innerText = unitDetail ? (unitDetail.tipeUnit || "-") : "-";
             document.getElementById("yard-modal-warna").innerText = unitDetail ? (unitDetail.warna || "-") : "-";
-            document.getElementById("yard-modal-customer").innerText = unitDetail ? (unitDetail.namaCustomer || "-") : "-";
+            document.getElementById("yard-modal-customer").innerText = unitDetail ? (unitDetail.namaCustomer || "PT. PARANI ARTAMANDIRI") : "PT. PARANI ARTAMANDIRI";
 
             document.getElementById("modal-yard-detail").classList.remove("hidden");
         }
@@ -953,7 +973,7 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         noMesin: cols[1] ? cols[1].trim() : "",
                         tipeUnit: cols[2] ? cols[2].trim() : "",
                         warna: cols[3] ? cols[3].trim() : "",
-                        namaCustomer: cols[4] ? cols[4].trim() : "",
+                        namaCustomer: cols[4] ? cols[4].trim() : "PT. PARANI ARTAMANDIRI",
                         namaSales: cols[5] ? cols[5].trim() : "",
                         slotYard: cols[6] ? cols[6].trim() : ""
                     });
@@ -1111,17 +1131,22 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
 
         // ORDER KIRIM KENDARAAN (OKK) & UPDATE LIVE PREVIEW
         function updateOkkPreview() {
+            var custInput = document.getElementById("okk-input-customer");
+            var customer = custInput ? custInput.value.trim() : "PT. PARANI ARTAMANDIRI";
             var asal = document.getElementById("okk-input-asal").value.trim() || "DAYA TOYOTA CAKUNG";
             var driver = document.getElementById("okk-input-driver").value.trim() || "-";
             var tujuan = document.getElementById("okk-input-tujuan").value.trim() || "-";
             var km = document.getElementById("okk-input-km").value.trim() || "-";
             var bbm = document.getElementById("okk-input-bbm").value.trim() || "-";
 
+            document.getElementById("okk-customer").innerText = customer || "PT. PARANI ARTAMANDIRI";
             document.getElementById("okk-asal").innerText = asal;
             document.getElementById("disp-driver").innerText = driver;
             document.getElementById("okk-tujuan").innerText = tujuan;
             document.getElementById("disp-km").innerText = km;
             document.getElementById("disp-bbm").innerText = bbm;
+            
+            setTodayDateForOkk();
         }
 
         function fetchOkkUnitData() {
@@ -1136,7 +1161,13 @@ MROHA8AV5T1801922	1GD-2021375	HILUX 2.8G DOUBLE CABIN 4x4	ATTITUDE BLACK MICA	PT
                         document.getElementById("okk-mesin").innerText = res.data.noMesin || "-";
                         document.getElementById("okk-tipe").innerText = res.data.tipeUnit || "-";
                         document.getElementById("okk-warna").innerText = res.data.warna || "-";
-                        document.getElementById("okk-customer").innerText = res.data.namaCustomer || "-";
+                        
+                        var custName = res.data.namaCustomer || "PT. PARANI ARTAMANDIRI";
+                        document.getElementById("okk-customer").innerText = custName;
+                        if (document.getElementById("okk-input-customer")) {
+                            document.getElementById("okk-input-customer").value = custName;
+                        }
+
                         document.getElementById("okk-aksesoris").innerText = res.data.namaSales || "-";
                         
                         fetch(API_URL + "?action=generateOkkNumber")
