@@ -12,23 +12,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- HTML5-QRCode Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- HTML2PDF Library -->
+    <!-- HTML2PDF Library (Untuk Simpan PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        toyota: {
-                            red: '#EB0A1E',
-                            dark: '#1E1E1E',
-                            gray: '#F4F5F7',
-                            card: '#FFFFFF'
-                        }
+                        toyota: { red: '#EB0A1E', dark: '#1E1E1E', gray: '#F4F5F7', card: '#FFFFFF' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif']
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
                 }
             }
         }
@@ -38,40 +32,31 @@
         .slot-box { transition: all 0.2s ease-in-out; }
         .slot-box:hover { transform: scale(1.05); cursor: pointer; }
         
-        /* OPTIMISASI CETAK PRINT AGAR MULTI-PAGE RAPI */
+        /* 
+           OPTIMISASI CETAK MULTI-PAGE & ANTI-BLANK:
+           Menggunakan teknik isolasi elemen. Saat class .printing ditambahkan ke body,
+           semua elemen utama disembunyikan KECUALI div #print-mount.
+        */
         @media print {
-            @page {
-                size: portrait;
-                margin: 10mm; /* Margin standar kertas */
+            @page { size: portrait; margin: 10mm; }
+            
+            body.printing > *:not(#print-mount) {
+                display: none !important;
             }
-            body {
-                background-color: #ffffff !important;
-                color: #000000 !important;
-            }
-            .hide-on-print { 
-                display: none !important; 
-            }
-            /* Reset styling untuk elemen yang dicetak */
-            .printable-active {
+            
+            #print-mount {
                 display: block !important;
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-                border: none !important;
-                box-shadow: none !important;
-                font-size: 11px !important;
-                line-height: 1.3 !important;
-                page-break-inside: auto !important;
             }
-            .printable-active div, 
-            .printable-active p, 
-            .printable-active span, 
-            .printable-active th, 
-            .printable-active td {
-                color: #000000 !important;
+            
+            #print-mount * {
+                color: #000000 !important; /* Paksa teks warna hitam untuk cetak */
             }
-            /* Menghindari potongan elemen di tengah halaman */
+
+            /* Mencegah elemen terpotong setengah halaman */
             .print-avoid-break {
                 page-break-inside: avoid;
             }
@@ -101,7 +86,6 @@
             </button>
         </div>
 
-        <!-- CONFIG BAR FOR APPS SCRIPT URL -->
         <div class="bg-gray-900 border-t border-gray-800 px-4 py-2 text-xs text-gray-300 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center space-x-2 w-full sm:w-auto">
                 <span class="font-semibold text-toyota-red"><i class="fa-solid fa-plug mr-1"></i> Apps Script Web App URL:</span>
@@ -128,7 +112,6 @@
                 <button onclick="switchTab('unitkeluar')" id="nav-unitkeluar" class="nav-btn text-gray-600 hover:text-toyota-red px-3 py-2 rounded-md transition"><i class="fa-solid fa-truck-ramp-box mr-1"></i> Unit Keluar</button>
             </div>
         </div>
-        <!-- MOBILE MENU DRAWER -->
         <div id="mobile-menu" class="hidden sm:hidden bg-white border-b border-gray-200 px-4 pt-2 pb-3 space-y-1 text-sm font-medium">
             <button onclick="switchTab('dashboard'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</button>
             <button onclick="switchTab('bulkupload'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-file-excel mr-2"></i> Bulk Upload</button>
@@ -355,7 +338,7 @@
             </div>
         </section>
 
-        <!-- 4. CHECKSHEET PDI TAB (DETAIL CHECKLIST & SIGNATURES) -->
+        <!-- 4. CHECKSHEET PDI TAB -->
         <section id="tab-checksheet" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b pb-3">
@@ -363,17 +346,19 @@
                         <h2 class="font-bold text-lg text-gray-900">Check Sheet Kendaraan Baru (Pre-Delivery Inspection)</h2>
                         <p class="text-xs text-gray-500">Form Inspeksi Detail PDS Daya Toyota Cakung</p>
                     </div>
-                    <div class="flex space-x-2">
+                    <div class="flex flex-wrap gap-2">
                         <button onclick="savePdiChecksheet()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan PDI
                         </button>
-                        <button onclick="printForm('printable-pdi-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="downloadPdf('printable-pdi-area', 'Checksheet_PDI.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> Simpan PDF
+                        </button>
+                        <button onclick="printDocument('printable-pdi-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-print mr-1"></i> Cetak Form PDI
                         </button>
                     </div>
                 </div>
 
-                <!-- VIN SEARCH FOR PDI -->
                 <div class="flex items-center space-x-2">
                     <input type="text" id="pdi-vin-input" placeholder="Masukkan 5 Digit / Full No. Rangka (VIN)..." class="p-2 border border-gray-300 rounded-lg text-xs w-72 focus:ring-1 focus:ring-toyota-red focus:outline-none">
                     <button onclick="fetchPdiUnitData()" class="bg-toyota-red text-white px-4 py-2 rounded-lg text-xs font-bold">Tarik Data Unit</button>
@@ -409,10 +394,8 @@
                         <p class="font-bold text-xs mb-2">Pilih Status Inspeksi (Checklist Fisik Kendaraan Baru):</p>
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-[10px] leading-tight">
-                            
-                            <!-- Kiri -->
                             <div class="space-y-3">
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan interior:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kunci Kontak</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Jok, Head Rest, Safety Belt, Console Box, Asbak</span></label>
@@ -421,7 +404,7 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Plafon, Lampu Plafon, Karpet, Sunvisor</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lighter (Jika Ada)</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body kanan:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Cek Steer, Klakson</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lampu – Lampu (Head, Back, Rem, Parking, Fog Lamp)</span></label>
@@ -431,7 +414,7 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Radio, Tape/ TV, Speaker</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Alarm</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pintu depan dan fender depan kanan:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Depan, Wiper</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Pintu, Kaca Spion Luar</span></label>
@@ -441,7 +424,7 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Fender</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan depan dan ruang mesin:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Bumper, Kap Mesin</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Grill / Logo, Valance, End Panel</span></label>
@@ -451,7 +434,7 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Hose Fuel</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Battery (Accu)</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body kiri depan:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Depan Kiri, Wiper</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Pintu, Kaca Spion Luar</span></label>
@@ -463,9 +446,8 @@
                                 </div>
                             </div>
 
-                            <!-- Kanan -->
                             <div class="space-y-3">
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body samping kiri:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Door Panel, Handle</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Moulding Body</span></label>
@@ -474,7 +456,7 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Cover Fuel Tank</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban & Mud Guard</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Belakang:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lampu (Kombinasi, Plat Nomor, Mundur)</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Handle, Wiper/Washer</span></label>
@@ -482,7 +464,7 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Bumper</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Ban Serep & *Cover Ban Serep</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body kanan samping:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Quarter Panel</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Door Panel, Handle</span></label>
@@ -490,14 +472,14 @@
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca – Kaca Samping</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Kolong kendaraan:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Tekanan angin dan ban terpasang</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kekencangan Mur/Baut Chassis & Pwr Train</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kondisi kolong dari kerusakan, karat, dll</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kebocoran oli/minyak fluida, bahan bakar</span></label>
                                 </div>
-                                <div>
+                                <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Perlengkapan:</h4>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Dokumen (Servis, Manual)</span></label>
                                     <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Tool set</span></label>
@@ -508,14 +490,13 @@
                         </div>
                     </div>
 
-                    <!-- Keterangan Tambahan & Tanda Tangan (Tidak boleh diputus halamannya) -->
+                    <!-- Keterangan & Tanda Tangan -->
                     <div class="print-avoid-break">
                         <div class="mt-4 pt-2 border-t">
-                            <p class="font-bold text-[11px] mb-1">Keterangan Tambahan (Jika ada bagian tidak ada di daftar ceklist atau ada cacat):</p>
+                            <p class="font-bold text-[11px] mb-1">Keterangan Tambahan (Jika ada cacat atau tidak sesuai daftar):</p>
                             <textarea id="pdi-keterangan" rows="2" class="w-full border border-gray-300 rounded p-1.5 text-[10px]" placeholder="Tuliskan keterangan (Opsional)..."></textarea>
                         </div>
                         
-                        <!-- Blok Tanda Tangan -->
                         <div class="grid grid-cols-2 gap-4 text-center mt-6 pt-2">
                             <div>
                                 <p class="font-bold text-[11px]">Diserahkan Oleh (PDS)</p>
@@ -533,7 +514,7 @@
             </div>
         </section>
 
-        <!-- 5. PDI DECISION SYSTEM V2.1 TAB (DROPDOWN KEPUTUSAN & FOTO WAJIB) -->
+        <!-- 5. PDI DECISION SYSTEM V2.1 TAB -->
         <section id="tab-pdidecision" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-3 gap-3">
@@ -541,11 +522,14 @@
                         <h2 class="font-bold text-lg text-gray-900"><i class="fa-solid fa-brain text-toyota-red mr-2"></i> PDI Decision System v2.1</h2>
                         <p class="text-xs text-gray-500">Sistem Keputusan Inspeksi Defect, Bukti Foto & Pencetakan Laporan Perbaikan</p>
                     </div>
-                    <div class="flex space-x-2">
+                    <div class="flex flex-wrap gap-2">
                         <button onclick="savePdiDecisionData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Keputusan
                         </button>
-                        <button onclick="printForm('printable-pdidecision-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="downloadPdf('printable-pdidecision-area', 'PDI_Decision.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> Simpan PDF
+                        </button>
+                        <button onclick="printDocument('printable-pdidecision-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-print mr-1"></i> Cetak Laporan
                         </button>
                     </div>
@@ -578,7 +562,6 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Keputusan Jalur Perbaikan <span class="text-red-500">*</span>:</label>
-                        <!-- Pilihan Dibatasi: Asuransi atau Body Repair Internal -->
                         <select id="pdi-dec-input-keputusan" class="w-full p-2 border border-gray-400 rounded focus:ring-1 focus:ring-toyota-red focus:outline-none font-bold text-toyota-red" required onchange="updatePdiDecisionPreview()">
                             <option value="">-- Pilih Keputusan --</option>
                             <option value="Asuransi">Asuransi</option>
@@ -658,7 +641,6 @@
                         <p class="text-[11px] text-gray-700 mt-1">Catatan Inspector: <span id="pdi-dec-disp-catatan" class="italic">-</span></p>
                     </div>
 
-                    <!-- CONTAINER FOTO WAJIB (Akan tercetak jelas) -->
                     <div id="pdi-dec-foto-container" class="border rounded p-3 text-center print-avoid-break">
                         <p class="text-[11px] font-bold text-gray-700 mb-2">Lampiran Bukti Foto Fisik Defect Unit:</p>
                         <img id="pdi-dec-foto-img" src="" alt="Belum ada foto yang diupload" class="mx-auto rounded border" style="max-height: 250px; object-fit: contain;">
@@ -683,7 +665,6 @@
                     </div>
                 </div>
 
-                <!-- RIWAYAT DATA DECISION SYSTEM -->
                 <div class="border rounded-xl p-4 bg-white space-y-3">
                     <div class="flex items-center justify-between">
                         <h3 class="font-bold text-sm text-gray-900"><i class="fa-solid fa-clock-rotate-left text-toyota-red mr-1"></i> Riwayat Keputusan PDI Decision System</h3>
@@ -698,13 +679,12 @@
                                     <th class="p-2">Tipe Defect</th>
                                     <th class="p-2">Tingkat</th>
                                     <th class="p-2">Biaya</th>
-                                    <th class="p-2">SLA</th>
                                     <th class="p-2">Keputusan</th>
                                 </tr>
                             </thead>
                             <tbody id="pdi-decision-table-body" class="divide-y divide-gray-200">
                                 <tr>
-                                    <td colspan="7" class="p-3 text-center text-gray-400">Belum ada riwayat keputusan PDI.</td>
+                                    <td colspan="6" class="p-3 text-center text-gray-400">Belum ada riwayat.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -790,11 +770,14 @@
                         <h2 class="font-bold text-lg text-gray-900">Surat Order Kirim Kendaraan</h2>
                         <p class="text-xs text-gray-500">Format Resmi PT Daya Adicipta Sandika - Daya Toyota Cakung</p>
                     </div>
-                    <div class="flex space-x-2">
+                    <div class="flex flex-wrap gap-2">
                         <button onclick="saveOrderKirimData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Surat OKK
                         </button>
-                        <button onclick="printForm('printable-okk-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="downloadPdf('printable-okk-area', 'Surat_OKK.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> Simpan PDF
+                        </button>
+                        <button onclick="printDocument('printable-okk-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-print mr-1"></i> Cetak Order Kirim
                         </button>
                     </div>
@@ -832,8 +815,9 @@
                     </div>
                 </div>
 
+                <!-- PRINTABLE OKK AREA -->
                 <div id="printable-okk-area" class="border border-gray-300 p-5 rounded-lg bg-white space-y-3 text-xs font-sans text-gray-800">
-                    <div class="flex justify-between items-start border-b pb-2">
+                    <div class="flex justify-between items-start border-b pb-2 print-avoid-break">
                         <div>
                             <h2 class="font-extrabold text-base tracking-wide text-gray-900">PT DAYA ADICIPTA SANDIKA</h2>
                             <p class="font-bold text-xs text-gray-700">DAYA TOYOTA CAKUNG</p>
@@ -848,7 +832,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 border-b pb-2">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-2 print-avoid-break">
                         <div>
                             <p class="mb-1"><b>Kepada:</b> <span id="okk-customer">PT. PARANI ARTAMANDIRI</span></p>
                             <p><b>Tipe Unit:</b> <span id="okk-tipe">HILUX 2.8G DOUBLE CABIN 4x4</span></p>
@@ -863,7 +847,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 border-b pb-2">
+                    <div class="grid grid-cols-2 gap-4 border-b pb-2 print-avoid-break">
                         <div>
                             <p class="font-bold mb-1">Perlengkapan Standard:</p>
                             <ul class="text-[10px] grid grid-cols-2 gap-x-1 gap-y-0.5">
@@ -884,7 +868,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-4 gap-2 text-center text-[10px] pt-2">
+                    <div class="grid grid-cols-4 gap-2 text-center text-[10px] pt-2 print-avoid-break">
                         <div>
                             <p class="font-bold">Diserahkan Oleh:</p>
                             <div class="h-10"></div>
@@ -908,7 +892,7 @@
                         </div>
                     </div>
 
-                    <div class="border-t pt-1.5 text-[9px] text-gray-500 italic flex justify-between">
+                    <div class="border-t pt-1.5 text-[9px] text-gray-500 italic flex justify-between print-avoid-break">
                         <span>Distribusi: Putih --> DRIVER</span>
                         <span>Merah --> ADM</span>
                         <span>Kuning --> PDS</span>
@@ -952,7 +936,9 @@
 
     </main>
 
-    <!-- FOOTER -->
+    <!-- CONTAINER KHUSUS UNTUK PROSES CETAK (Anti-Blank & Anti-Terpotong) -->
+    <div id="print-mount" style="display: none;"></div>
+
     <footer class="bg-white border-t border-gray-200 mt-auto py-4 text-center text-xs text-gray-500">
         <p>&copy; 2026 Daya Toyota Cakung. Pre-Delivery Service (PDS) & Delivery Management System.</p>
     </footer>
@@ -1001,14 +987,9 @@
             var year = today.getFullYear();
             var formattedDate = day + ". " + month + ". " + year;
             
-            var okkDateElem = document.getElementById("okk-tanggal");
-            if (okkDateElem) okkDateElem.innerText = formattedDate;
-            
-            var decDateElem = document.getElementById("pdi-dec-tgl-inspect");
-            if (decDateElem) decDateElem.innerText = formattedDate;
-            
-            var pdiTglCetak = document.getElementById("pdi-tgl-cetak");
-            if (pdiTglCetak) pdiTglCetak.innerText = formattedDate;
+            if (document.getElementById("okk-tanggal")) document.getElementById("okk-tanggal").innerText = formattedDate;
+            if (document.getElementById("pdi-dec-tgl-inspect")) document.getElementById("pdi-dec-tgl-inspect").innerText = formattedDate;
+            if (document.getElementById("pdi-tgl-cetak")) document.getElementById("pdi-tgl-cetak").innerText = formattedDate;
         }
 
         function saveApiUrl() {
@@ -1094,7 +1075,7 @@
             var tbody = document.getElementById("stock-table-body");
             tbody.innerHTML = "";
             if (!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-gray-400">Belum ada data stock unit. Silakan unggah data via Bulk Upload.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-gray-400">Belum ada data stock unit.</td></tr>';
                 return;
             }
             list.forEach(item => {
@@ -1112,7 +1093,7 @@
                     <td class="p-3 flex items-center space-x-2">
                         <span class="${item.status && item.status.includes('Keluar') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} text-[10px] px-2 py-1 rounded font-bold">${item.status}</span>
                         <button onclick="openEditModal('${item.noRangka}', '${item.tanggalMasuk}', '${item.slotYard}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[10px] font-bold transition">
-                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                            <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                     </td>
                 `;
@@ -1149,17 +1130,7 @@
             var tglMasuk = document.getElementById("edit-tgl-masuk").value;
             var slot = document.getElementById("edit-slot").value;
 
-            if (!API_URL) {
-                alert("Mode Offline: Data diperbarui lokal.");
-                var unit = sampleStockData.find(u => u.noRangka === vin);
-                if (unit) {
-                    unit.tanggalMasuk = tglMasuk;
-                    unit.slotYard = slot;
-                    renderStockTable(sampleStockData);
-                }
-                closeEditModal();
-                return;
-            }
+            if (!API_URL) return;
 
             fetch(API_URL, {
                 method: "POST",
@@ -1212,7 +1183,6 @@
             var unitDetail = sampleStockData.find(u => u.noRangka && vin && (u.noRangka.toUpperCase() === vin.toUpperCase() || u.noRangka.toUpperCase().endsWith(vin.toUpperCase())));
 
             document.getElementById("yard-modal-slot").innerText = "Slot " + slotNum;
-
             var statusSpan = document.getElementById("yard-modal-status");
             if (isOccupied) {
                 statusSpan.innerText = "Stock Ada (Terisi)";
@@ -1225,7 +1195,7 @@
             document.getElementById("yard-modal-vin").innerText = vin || "-";
             document.getElementById("yard-modal-tipe").innerText = unitDetail ? (unitDetail.tipeUnit || "-") : "-";
             document.getElementById("yard-modal-warna").innerText = unitDetail ? (unitDetail.warna || "-") : "-";
-            document.getElementById("yard-modal-customer").innerText = unitDetail ? (unitDetail.namaCustomer || "PT. PARANI ARTAMANDIRI") : "PT. PARANI ARTAMANDIRI";
+            document.getElementById("yard-modal-customer").innerText = unitDetail ? (unitDetail.namaCustomer || "-") : "-";
 
             document.getElementById("modal-yard-detail").classList.remove("hidden");
         }
@@ -1248,7 +1218,7 @@
                         noMesin: cols[1] ? cols[1].trim() : "",
                         tipeUnit: cols[2] ? cols[2].trim() : "",
                         warna: cols[3] ? cols[3].trim() : "",
-                        namaCustomer: cols[4] ? cols[4].trim() : "PT. PARANI ARTAMANDIRI",
+                        namaCustomer: cols[4] ? cols[4].trim() : "",
                         namaSales: cols[5] ? cols[5].trim() : "",
                         slotYard: cols[6] ? cols[6].trim() : ""
                     });
@@ -1257,13 +1227,7 @@
 
             if (records.length === 0) { alert("Format data tidak terdeteksi. Gunakan pisah Tab (TSV)!"); return; }
 
-            if (!API_URL) {
-                alert("Demo Mode: " + records.length + " data terproses lokal!");
-                sampleStockData = records.concat(sampleStockData);
-                renderStockTable(sampleStockData);
-                switchTab("dashboard");
-                return;
-            }
+            if (!API_URL) return;
 
             fetch(API_URL, {
                 method: "POST",
@@ -1310,7 +1274,7 @@
                 action: "saveChecksheetPdi",
                 noRangka: vin,
                 tanggalPdi: new Date().toISOString().split('T')[0],
-                inspector: "PDS Inspector Daya Toyota",
+                inspector: "PDS Inspector",
                 statusPdi: "PASSED",
                 detailChecks: { passed: true, catatan: document.getElementById("pdi-keterangan").value }
             };
@@ -1371,7 +1335,6 @@
             var keputusan = document.getElementById("pdi-dec-input-keputusan").value || "- Belum Dipilih -";
             var catatan = document.getElementById("pdi-dec-input-catatan").value || "-";
 
-            // Update ke form printable
             document.getElementById("pdi-dec-disp-tipe").innerText = tipe;
             document.getElementById("pdi-dec-disp-tingkat").innerText = tingkat;
             document.getElementById("pdi-dec-disp-biaya").innerText = "Rp " + biaya.toLocaleString('id-ID');
@@ -1379,14 +1342,11 @@
             document.getElementById("pdi-dec-disp-keputusan").innerText = keputusan;
             document.getElementById("pdi-dec-disp-catatan").innerText = catatan;
 
-            // Update Gambar Preview
             var fotoImg = document.getElementById("pdi-dec-foto-img");
             if (pdiDecisionPhotoBase64) {
                 fotoImg.src = pdiDecisionPhotoBase64;
-                fotoImg.style.display = "block";
             } else {
                 fotoImg.src = "";
-                fotoImg.style.display = "none";
             }
 
             setTodayDateForDocs();
@@ -1417,8 +1377,8 @@
                 sisaHariSla: parseInt(document.getElementById("pdi-dec-input-sla").value) || 0,
                 keputusanPerbaikan: keputusan,
                 catatanInspector: document.getElementById("pdi-dec-input-catatan").value,
-                fotoDefect: "Ada (Tersimpan Lokal)",
-                statusPersetujuan: "Approved by PDS System"
+                fotoDefect: "Ada (Tersimpan)",
+                statusPersetujuan: "Approved"
             };
 
             fetch(API_URL, {
@@ -1449,16 +1409,15 @@
                                 <td class="p-2">${item.tipeDefect}</td>
                                 <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">${item.tingkatKerusakan}</span></td>
                                 <td class="p-2">Rp ${parseFloat(item.estimasiBiaya || 0).toLocaleString('id-ID')}</td>
-                                <td class="p-2">${item.sisaHariSla} Hari</td>
                                 <td class="p-2 font-bold text-gray-800">${item.keputusanPerbaikan}</td>
                             `;
                             tbody.appendChild(tr);
                         });
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="7" class="p-3 text-center text-gray-400">Belum ada riwayat keputusan PDI.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="6" class="p-3 text-center text-gray-400">Belum ada riwayat.</td></tr>';
                     }
                 })
-                .catch(err => console.error("Gagal memuat riwayat PDI Decision:", err));
+                .catch(err => console.error("Gagal memuat riwayat:", err));
         }
 
         // STOCK OPNAME QR SCANNER
@@ -1468,7 +1427,7 @@
             html5QrCodeScanner.render(onScanSuccess);
         }
 
-        function onScanSuccess(decodedText, decodedResult) {
+        function onScanSuccess(decodedText) {
             document.getElementById("opname-vin-input").value = decodedText;
         }
 
@@ -1541,7 +1500,7 @@
             a.click();
         }
 
-        // ORDER KIRIM KENDARAAN (OKK) & UPDATE LIVE PREVIEW
+        // ORDER KIRIM KENDARAAN (OKK)
         function updateOkkPreview() {
             var custInput = document.getElementById("okk-input-customer");
             var customer = custInput ? custInput.value.trim() : "PT. PARANI ARTAMANDIRI";
@@ -1648,18 +1607,14 @@
             .catch(err => alert("Gagal memproses unit keluar."));
         }
 
-        // --- FUNGSI KHUSUS PRINT AGAR MULTI-PAGE RAPI ---
-        function printForm(elementId) {
+        // --- FUNGSI CETAK DOKUMEN SUPER RAPI (MENCEGAH BLANK & MENDUKUNG MULTI-PAGE) ---
+        function printDocument(elementId) {
             var elem = document.getElementById(elementId);
-            if (!elem) {
-                alert("Area cetak tidak ditemukan!");
-                return;
-            }
+            if (!elem) { alert("Area cetak tidak ditemukan!"); return; }
 
-            // Validasi khusus untuk PDI Decision Form
+            // Validasi khusus PDI Decision (Wajib Isi)
             if (elementId === 'printable-pdidecision-area') {
-                var keputusan = document.getElementById("pdi-dec-input-keputusan").value;
-                if (!keputusan) {
+                if (!document.getElementById("pdi-dec-input-keputusan").value) {
                     alert("Pastikan Anda sudah memilih Keputusan Perbaikan terlebih dahulu sebelum mencetak!");
                     return;
                 }
@@ -1669,26 +1624,67 @@
                 }
             }
 
-            // Memanipulasi DOM untuk menyembunyikan elemen selain dari yang ingin di cetak
-            document.querySelectorAll('header, nav, footer').forEach(el => el.classList.add('hide-on-print'));
+            // Memindahkan DOM ke tempat "isolasi cetak" (print-mount)
+            var mount = document.getElementById('print-mount');
+            var originalParent = elem.parentNode;
+            var originalNextSibling = elem.nextSibling;
             
-            // Sembunyikan content di luar section tab ini
-            var parentTab = elem.closest('.tab-content');
-            Array.from(parentTab.children).forEach(child => {
-                if (child !== elem) {
-                    child.classList.add('hide-on-print');
-                }
-            });
-
-            // Tambahkan class agar element menjadi block level tanpa absolute sehingga tidak terpotong (pagnation jalan)
-            elem.classList.add('printable-active');
+            // Pindahkan element yang mau diprint ke penampungan terpisah & beri class body
+            mount.appendChild(elem);
+            document.body.classList.add('printing');
             
-            // Panggil Print Preview Browser
+            // Panggil dialog print browser
             window.print();
             
-            // Kembalikan Tampilan Website Seperti Semula
-            document.querySelectorAll('.hide-on-print').forEach(el => el.classList.remove('hide-on-print'));
-            elem.classList.remove('printable-active');
+            // Kembalikan ke struktur halaman aslinya
+            document.body.classList.remove('printing');
+            if (originalNextSibling) {
+                originalParent.insertBefore(elem, originalNextSibling);
+            } else {
+                originalParent.appendChild(elem);
+            }
+        }
+
+        // --- FUNGSI DOWNLOAD / SIMPAN PDF ---
+        function downloadPdf(elementId, filename) {
+            var element = document.getElementById(elementId);
+            if (!element) { alert("Area dokumen tidak ditemukan!"); return; }
+
+            // Validasi khusus PDI Decision (Wajib Isi)
+            if (elementId === 'printable-pdidecision-area') {
+                if (!document.getElementById("pdi-dec-input-keputusan").value) {
+                    alert("Pastikan Anda sudah memilih Keputusan Perbaikan sebelum simpan PDF!");
+                    return;
+                }
+                if (!pdiDecisionPhotoBase64) {
+                    alert("Pastikan Anda sudah mengunggah Foto Defect sebelum simpan PDF!");
+                    return;
+                }
+            }
+
+            var baseFilename = filename || 'Dokumen.pdf';
+            // Custom filename berdasarkan VIN jika ada
+            if (elementId === 'printable-okk-area') {
+                var noSurat = document.getElementById('okk-nomor').innerText.replace(/\//g, '_');
+                baseFilename = 'Surat_OKK_' + noSurat + '.pdf';
+            } else if (elementId === 'printable-pdi-area') {
+                var vinPdi = document.getElementById('pdi-vin').innerText;
+                baseFilename = 'Checksheet_PDI_' + (vinPdi !== '-' ? vinPdi : 'Unit') + '.pdf';
+            } else if (elementId === 'printable-pdidecision-area') {
+                var vinDec = document.getElementById('pdi-dec-vin').innerText;
+                baseFilename = 'PDI_Decision_' + (vinDec !== '-' ? vinDec : 'Unit') + '.pdf';
+            }
+
+            var opt = {
+                margin:       10, // Margin PDF (10mm)
+                filename:     baseFilename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Proses rendering PDF
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
