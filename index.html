@@ -34,7 +34,7 @@
         @media print {
             @page { 
                 size: a4 portrait; 
-                margin: 5mm; /* Margin dibuat sekecil mungkin agar 1 halaman muat banyak */
+                margin: 5mm; 
             }
             
             body.printing > *:not(#print-mount) {
@@ -47,7 +47,6 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-                /* Pengaturan skala zoom-out opsional untuk memastikan A4 muat */
                 transform: scale(0.98); 
                 transform-origin: top left;
             }
@@ -62,10 +61,10 @@
 
             /* KOMPRESI KHUSUS PDI AGAR MUAT 1 HALAMAN */
             #printable-pdi-area {
-                font-size: 8.5px !important; /* Font lebih kecil saat diprint */
+                font-size: 8.5px !important; 
                 line-height: 1.1 !important;
                 padding: 10px !important;
-                border: none !important; /* Hilangkan border luar agar lega */
+                border: none !important; 
             }
             #printable-pdi-area h3 { font-size: 12px !important; margin-bottom: 2px !important; }
             #printable-pdi-area h4 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; border-bottom: 1px solid #ccc !important;}
@@ -76,13 +75,13 @@
             }
             #printable-pdi-area .p-2 { padding: 4px !important; }
             #printable-pdi-area .space-y-3 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 4px !important; /* Kecilkan jarak antar paragraf/div checklist */
+                margin-top: 4px !important; 
             }
             #printable-pdi-area input[type=checkbox] {
                 transform: scale(0.8);
                 margin: 0 !important;
             }
-            #printable-pdi-area .h-16 { height: 35px !important; } /* Kecilkan area tanda tangan */
+            #printable-pdi-area .h-16 { height: 35px !important; } 
             
             /* Paksa 3 Kolom untuk print Checksheet */
             .pdi-grid-print {
@@ -116,8 +115,9 @@
             </button>
         </div>
 
-        <div class="bg-gray-900 border-t border-gray-800 px-4 py-2 text-xs text-gray-300 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center space-x-2 w-full sm:w-auto">
+        <div class="bg-gray-900 border-t border-gray-800 px-4 py-2 text-xs text-gray-300 flex flex-wrap items-center justify-end gap-2">
+            <!-- INPUT API URL DISEMBUNYIKAN DARI TAMPILAN MENGGUNAKAN CLASS 'hidden' -->
+            <div class="hidden items-center space-x-2 w-full sm:w-auto">
                 <span class="font-semibold text-toyota-red"><i class="fa-solid fa-plug mr-1"></i> Apps Script Web App URL:</span>
                 <input type="text" id="appscript-url" placeholder="https://script.google.com/macros/s/.../exec" class="bg-gray-800 border border-gray-700 text-white px-2 py-1 rounded w-full sm:w-96 text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
                 <button onclick="saveApiUrl()" class="bg-toyota-red hover:bg-red-700 text-white px-3 py-1 rounded font-semibold text-xs">Simpan</button>
