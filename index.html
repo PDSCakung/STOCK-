@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DAYA TOYOTA CAKUNG - Sistem Manajemen Stock & Delivery</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- HTML5-QRCode Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- HTML2PDF Library (Untuk Simpan PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script>
@@ -34,11 +29,13 @@
         
         /* 
            OPTIMISASI CETAK MULTI-PAGE & ANTI-BLANK:
-           Menggunakan teknik isolasi elemen. Saat class .printing ditambahkan ke body,
-           semua elemen utama disembunyikan KECUALI div #print-mount.
+           Menggunakan teknik isolasi elemen #print-mount
         */
         @media print {
-            @page { size: portrait; margin: 10mm; }
+            @page { 
+                size: a4 portrait; 
+                margin: 5mm; /* Margin dibuat sekecil mungkin agar 1 halaman muat banyak */
+            }
             
             body.printing > *:not(#print-mount) {
                 display: none !important;
@@ -50,15 +47,48 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
+                /* Pengaturan skala zoom-out opsional untuk memastikan A4 muat */
+                transform: scale(0.98); 
+                transform-origin: top left;
             }
             
             #print-mount * {
-                color: #000000 !important; /* Paksa teks warna hitam untuk cetak */
+                color: #000000 !important;
             }
 
-            /* Mencegah elemen terpotong setengah halaman */
             .print-avoid-break {
                 page-break-inside: avoid;
+            }
+
+            /* KOMPRESI KHUSUS PDI AGAR MUAT 1 HALAMAN */
+            #printable-pdi-area {
+                font-size: 8.5px !important; /* Font lebih kecil saat diprint */
+                line-height: 1.1 !important;
+                padding: 10px !important;
+                border: none !important; /* Hilangkan border luar agar lega */
+            }
+            #printable-pdi-area h3 { font-size: 12px !important; margin-bottom: 2px !important; }
+            #printable-pdi-area h4 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; border-bottom: 1px solid #ccc !important;}
+            #printable-pdi-area p { margin-bottom: 1px !important; }
+            #printable-pdi-area .mb-3, #printable-pdi-area .mb-2, #printable-pdi-area .mt-4, #printable-pdi-area .mt-6 { 
+                margin-bottom: 4px !important; 
+                margin-top: 4px !important; 
+            }
+            #printable-pdi-area .p-2 { padding: 4px !important; }
+            #printable-pdi-area .space-y-3 > :not([hidden]) ~ :not([hidden]) {
+                margin-top: 4px !important; /* Kecilkan jarak antar paragraf/div checklist */
+            }
+            #printable-pdi-area input[type=checkbox] {
+                transform: scale(0.8);
+                margin: 0 !important;
+            }
+            #printable-pdi-area .h-16 { height: 35px !important; } /* Kecilkan area tanda tangan */
+            
+            /* Paksa 3 Kolom untuk print Checksheet */
+            .pdi-grid-print {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
             }
         }
     </style>
@@ -338,7 +368,7 @@
             </div>
         </section>
 
-        <!-- 4. CHECKSHEET PDI TAB -->
+        <!-- 4. CHECKSHEET PDI TAB (DENGAN KOMPRESI AGAR MUAT 1 HALAMAN) -->
         <section id="tab-checksheet" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b pb-3">
@@ -350,7 +380,7 @@
                         <button onclick="savePdiChecksheet()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan PDI
                         </button>
-                        <button onclick="downloadPdf('printable-pdi-area', 'Checksheet_PDI.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="downloadPdf('printable-pdi-area', 'Checksheet_PDI.pdf', 'a4', 'portrait')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-file-pdf mr-1"></i> Simpan PDF
                         </button>
                         <button onclick="printDocument('printable-pdi-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
@@ -365,19 +395,19 @@
                 </div>
 
                 <!-- PRINTABLE PDI AREA -->
-                <div id="printable-pdi-area" class="border p-5 rounded-lg bg-white text-xs text-gray-800 font-sans">
-                    <div class="flex justify-between items-start border-b pb-2 mb-3">
+                <div id="printable-pdi-area" class="border p-5 rounded-lg bg-white text-[11px] text-gray-800 font-sans leading-tight">
+                    <div class="flex justify-between items-start border-b pb-1 mb-2 print-avoid-break">
                         <div>
-                            <h3 class="font-bold text-sm text-toyota-red">PT DAYA ADICIPTA SANDIKA</h3>
-                            <p class="font-semibold text-xs">DAYA TOYOTA CAKUNG - PRE-DELIVERY SERVICE</p>
+                            <h3 class="font-extrabold text-sm text-toyota-red m-0 p-0">PT DAYA ADICIPTA SANDIKA</h3>
+                            <p class="font-bold text-[10px] m-0 p-0">DAYA TOYOTA CAKUNG - PRE-DELIVERY SERVICE</p>
                         </div>
-                        <div class="text-right text-[10px] text-gray-500">
-                            <p>No. Dokumen: <b>FM-LOG-001 (Rev)</b></p>
-                            <p>Tanggal Cetak: <span id="pdi-tgl-cetak">-</span></p>
+                        <div class="text-right text-[9px] text-gray-500">
+                            <p class="m-0">No. Dok: <b>FM-LOG-001 (Rev)</b></p>
+                            <p class="m-0">Tgl Cetak: <span id="pdi-tgl-cetak">-</span></p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 bg-gray-50 p-2 rounded mb-3 border print-avoid-break">
+                    <div class="grid grid-cols-2 gap-2 bg-gray-50 p-2 rounded mb-2 border print-avoid-break text-[10px]">
                         <div>
                             <p><b>Asal Cabang:</b> DAYA TOYOTA CAKUNG</p>
                             <p><b>No. Rangka:</b> <span id="pdi-vin" class="font-mono font-bold text-gray-900">-</span></p>
@@ -386,127 +416,117 @@
                         <div>
                             <p><b>Tipe / Model:</b> <span id="pdi-tipe">-</span></p>
                             <p><b>Warna:</b> <span id="pdi-warna">-</span></p>
-                            <p><b>Tanggal Masuk:</b> <span id="pdi-tglmasuk">-</span></p>
+                            <p><b>Tgl Masuk:</b> <span id="pdi-tglmasuk">-</span></p>
                         </div>
                     </div>
 
                     <div class="border-t pt-2">
-                        <p class="font-bold text-xs mb-2">Pilih Status Inspeksi (Checklist Fisik Kendaraan Baru):</p>
+                        <p class="font-bold text-[10px] mb-2 text-center bg-gray-200 py-1 print-avoid-break">STATUS INSPEKSI KENDARAAN (CHECKLIST FISIK)</p>
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-[10px] leading-tight">
-                            <div class="space-y-3">
+                        <!-- Saat di layar: 2 kolom | Saat diprint: 3 kolom (Diatur via .pdi-grid-print di CSS @media print) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 pdi-grid-print gap-x-4 gap-y-2 text-[9px]">
+                            
+                            <div class="space-y-2">
                                 <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan interior:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kunci Kontak</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Jok, Head Rest, Safety Belt, Console Box, Asbak</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Instrument Panel (Dashboard, hazard)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Air Conditioner (AC)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Plafon, Lampu Plafon, Karpet, Sunvisor</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lighter (Jika Ada)</span></label>
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Pemeriksaan interior:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Kunci Kontak</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Jok, Head Rest, Safety Belt, Console Box, Asbak</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Instrument Panel (Dashboard, hazard)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Air Conditioner (AC)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Plafon, Lampu Plafon, Karpet, Sunvisor</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Lighter (Jika Ada)</span></label>
                                 </div>
                                 <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body kanan:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Cek Steer, Klakson</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lampu – Lampu (Head, Back, Rem, Parking, Fog Lamp)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lampu Indikator / Switch Instrument</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Wiper, Washer</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Pedal Rem, Rem Tangan</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Radio, Tape/ TV, Speaker</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Alarm</span></label>
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Pemeriksaan body kanan:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Cek Steer, Klakson</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Lampu (Head, Back, Rem, Parking, Fog)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Lampu Indikator / Switch</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Wiper, Washer</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Pedal Rem, Rem Tangan</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Radio, Tape/ TV, Speaker</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Alarm</span></label>
                                 </div>
                                 <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pintu depan dan fender depan kanan:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Depan, Wiper</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Pintu, Kaca Spion Luar</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Handle</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Door Panel</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Moulding Body</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Fender</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban, Mud Guard</span></label>
-                                </div>
-                                <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan depan dan ruang mesin:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Bumper, Kap Mesin</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Grill / Logo, Valance, End Panel</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lampu Besar, Lampu Sign</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Minyak (Rem, Kopling, Power Steering, Oli mesin)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Tank (Washer & Radiator)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Hose Fuel</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Battery (Accu)</span></label>
-                                </div>
-                                <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body kiri depan:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Depan Kiri, Wiper</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca Pintu, Kaca Spion Luar</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Handle</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Door Panel</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Moulding Body</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Fender</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban, Mud Guard</span></label>
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Pintu & fender depan kanan:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Kaca Depan, Wiper</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Kaca Pintu, Kaca Spion Luar</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Handle & Door Panel</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Moulding Body & Fender</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
                             </div>
 
-                            <div class="space-y-3">
+                            <div class="space-y-2">
                                 <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body samping kiri:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Door Panel, Handle</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Moulding Body</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca – kaca samping</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Quarter Panel</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Cover Fuel Tank</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban & Mud Guard</span></label>
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Depan & ruang mesin:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Bumper, Kap Mesin</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Grill, Logo, Valance, End Panel</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Lampu Besar, Lampu Sign</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Minyak (Rem, Kopling, Pwr Steer, Oli)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Tank (Washer & Radiator)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Hose Fuel & Battery (Accu)</span></label>
                                 </div>
                                 <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Belakang:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Lampu (Kombinasi, Plat Nomor, Mundur)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Handle, Wiper/Washer</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Truck Panel (Bagasi, Emblem)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Bumper</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Ban Serep & *Cover Ban Serep</span></label>
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Body kiri depan:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Kaca Depan Kiri, Wiper</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Kaca Pintu, Kaca Spion Luar</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Handle & Door Panel</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Moulding Body & Fender</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
                                 <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Pemeriksaan body kanan samping:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Quarter Panel</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Door Panel, Handle</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Moulding Body</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kaca – Kaca Samping</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Velg, Ban, Mud Guard</span></label>
-                                </div>
-                                <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Kolong kendaraan:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Tekanan angin dan ban terpasang</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kekencangan Mur/Baut Chassis & Pwr Train</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kondisi kolong dari kerusakan, karat, dll</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Kebocoran oli/minyak fluida, bahan bakar</span></label>
-                                </div>
-                                <div class="print-avoid-break">
-                                    <h4 class="font-bold border-b border-gray-300 pb-1 mb-1 text-gray-700">Perlengkapan:</h4>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Dokumen (Servis, Manual)</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Tool set</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Dongkrak + stang</span></label>
-                                    <label class="flex items-center space-x-1.5"><input type="checkbox" checked> <span>Dop roda</span></label>
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Body samping kiri:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Door Panel, Handle</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Moulding Body & Kaca samping</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Quarter Panel & Cover Fuel Tank</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Velg, Ban & Mud Guard</span></label>
                                 </div>
                             </div>
+
+                            <div class="space-y-2">
+                                <div class="print-avoid-break">
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Belakang:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Lampu (Kombinasi, Plat, Mundur)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Handle, Wiper/Washer</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Truck Panel (Bagasi, Emblem)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Bumper, Ban Serep & *Cover</span></label>
+                                </div>
+                                <div class="print-avoid-break">
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Body kanan samping:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Quarter Panel, Door Panel, Handle</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Moulding Body & Kaca Samping</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Velg, Ban, Mud Guard</span></label>
+                                </div>
+                                <div class="print-avoid-break">
+                                    <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Kolong kendaraan & Alat:</h4>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Tekanan angin ban</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Mur/Baut Chassis & Kondisi kolong</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Bebas Kebocoran oli/fluida</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Dokumen (Servis, Manual)</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="mt-0.5"> <span>Tool set, Dongkrak, Stang, Dop roda</span></label>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
                     <!-- Keterangan & Tanda Tangan -->
-                    <div class="print-avoid-break">
-                        <div class="mt-4 pt-2 border-t">
-                            <p class="font-bold text-[11px] mb-1">Keterangan Tambahan (Jika ada cacat atau tidak sesuai daftar):</p>
-                            <textarea id="pdi-keterangan" rows="2" class="w-full border border-gray-300 rounded p-1.5 text-[10px]" placeholder="Tuliskan keterangan (Opsional)..."></textarea>
+                    <div class="print-avoid-break mt-2">
+                        <div class="border-t pt-1">
+                            <p class="font-bold text-[9px] mb-0.5">Keterangan Tambahan (Cacat/Tidak sesuai):</p>
+                            <textarea id="pdi-keterangan" rows="2" class="w-full border border-gray-300 rounded p-1 text-[9px] resize-none" placeholder="-"></textarea>
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-4 text-center mt-6 pt-2">
+                        <div class="grid grid-cols-2 gap-4 text-center mt-3 pt-1">
                             <div>
-                                <p class="font-bold text-[11px]">Diserahkan Oleh (PDS)</p>
-                                <div class="h-16"></div>
-                                <p class="border-t pt-1 w-40 mx-auto text-[10px]">( Nama & Tanda Tangan )</p>
+                                <p class="font-bold text-[10px]">Diserahkan Oleh (PDS)</p>
+                                <div class="h-12 border border-transparent"></div>
+                                <p class="border-t border-gray-800 pt-0.5 w-40 mx-auto text-[9px]">( Nama & Tanda Tangan )</p>
                             </div>
                             <div>
-                                <p class="font-bold text-[11px]">Diterima Oleh (Sales)</p>
-                                <div class="h-16"></div>
-                                <p class="border-t pt-1 w-40 mx-auto text-[10px]">( Nama & Tanda Tangan )</p>
+                                <p class="font-bold text-[10px]">Diterima Oleh (Sales)</p>
+                                <div class="h-12 border border-transparent"></div>
+                                <p class="border-t border-gray-800 pt-0.5 w-40 mx-auto text-[9px]">( Nama & Tanda Tangan )</p>
                             </div>
                         </div>
                     </div>
@@ -526,7 +546,7 @@
                         <button onclick="savePdiDecisionData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Keputusan
                         </button>
-                        <button onclick="downloadPdf('printable-pdidecision-area', 'PDI_Decision.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="downloadPdf('printable-pdidecision-area', 'PDI_Decision.pdf', 'a4', 'portrait')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-file-pdf mr-1"></i> Simpan PDF
                         </button>
                         <button onclick="printDocument('printable-pdidecision-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
@@ -774,7 +794,7 @@
                         <button onclick="saveOrderKirimData()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Surat OKK
                         </button>
-                        <button onclick="downloadPdf('printable-okk-area', 'Surat_OKK.pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
+                        <button onclick="downloadPdf('printable-okk-area', 'Surat_OKK.pdf', 'landscape')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition">
                             <i class="fa-solid fa-file-pdf mr-1"></i> Simpan PDF
                         </button>
                         <button onclick="printDocument('printable-okk-area')" class="bg-gray-800 hover:bg-black text-white px-4 py-2 rounded-lg text-xs font-bold transition">
@@ -1607,12 +1627,12 @@
             .catch(err => alert("Gagal memproses unit keluar."));
         }
 
-        // --- FUNGSI CETAK DOKUMEN SUPER RAPI (MENCEGAH BLANK & MENDUKUNG MULTI-PAGE) ---
+        // --- FUNGSI CETAK (PRINT) DOKUMEN SUPER RAPI (Anti-Blank & Anti-Terpotong) ---
         function printDocument(elementId) {
             var elem = document.getElementById(elementId);
             if (!elem) { alert("Area cetak tidak ditemukan!"); return; }
 
-            // Validasi khusus PDI Decision (Wajib Isi)
+            // Validasi PDI Decision (Wajib Isi)
             if (elementId === 'printable-pdidecision-area') {
                 if (!document.getElementById("pdi-dec-input-keputusan").value) {
                     alert("Pastikan Anda sudah memilih Keputusan Perbaikan terlebih dahulu sebelum mencetak!");
@@ -1624,19 +1644,17 @@
                 }
             }
 
-            // Memindahkan DOM ke tempat "isolasi cetak" (print-mount)
             var mount = document.getElementById('print-mount');
             var originalParent = elem.parentNode;
             var originalNextSibling = elem.nextSibling;
             
-            // Pindahkan element yang mau diprint ke penampungan terpisah & beri class body
+            // Isolasi Cetak (Memindahkan DOM sementara)
             mount.appendChild(elem);
             document.body.classList.add('printing');
             
-            // Panggil dialog print browser
             window.print();
             
-            // Kembalikan ke struktur halaman aslinya
+            // Kembalikan ke asal
             document.body.classList.remove('printing');
             if (originalNextSibling) {
                 originalParent.insertBefore(elem, originalNextSibling);
@@ -1645,12 +1663,12 @@
             }
         }
 
-        // --- FUNGSI DOWNLOAD / SIMPAN PDF ---
-        function downloadPdf(elementId, filename) {
+        // --- FUNGSI DOWNLOAD / SIMPAN PDF (MENGGUNAKAN HTML2PDF) ---
+        function downloadPdf(elementId, filename, format = 'a4', orient = 'portrait') {
             var element = document.getElementById(elementId);
             if (!element) { alert("Area dokumen tidak ditemukan!"); return; }
 
-            // Validasi khusus PDI Decision (Wajib Isi)
+            // Validasi PDI Decision (Wajib Isi)
             if (elementId === 'printable-pdidecision-area') {
                 if (!document.getElementById("pdi-dec-input-keputusan").value) {
                     alert("Pastikan Anda sudah memilih Keputusan Perbaikan sebelum simpan PDF!");
@@ -1663,7 +1681,6 @@
             }
 
             var baseFilename = filename || 'Dokumen.pdf';
-            // Custom filename berdasarkan VIN jika ada
             if (elementId === 'printable-okk-area') {
                 var noSurat = document.getElementById('okk-nomor').innerText.replace(/\//g, '_');
                 baseFilename = 'Surat_OKK_' + noSurat + '.pdf';
@@ -1675,16 +1692,33 @@
                 baseFilename = 'PDI_Decision_' + (vinDec !== '-' ? vinDec : 'Unit') + '.pdf';
             }
 
+            // Atur Style sementara agar hasil PDF terlihat rapi (Grid 3 kolom untuk Checksheet)
+            if(elementId === 'printable-pdi-area') {
+               var grids = element.querySelectorAll('.grid-cols-1');
+               grids.forEach(g => {
+                   g.classList.remove('grid-cols-1', 'sm:grid-cols-2');
+                   g.classList.add('grid-cols-3'); // Paksa 3 kolom di PDF
+               });
+            }
+
             var opt = {
-                margin:       10, // Margin PDF (10mm)
+                margin:       5, // Margin tipis
                 filename:     baseFilename,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF:        { unit: 'mm', format: format, orientation: orient }
             };
 
-            // Proses rendering PDF
-            html2pdf().set(opt).from(element).save();
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Kembalikan style grid seperti semula
+                if(elementId === 'printable-pdi-area') {
+                   var grids = element.querySelectorAll('.grid-cols-3');
+                   grids.forEach(g => {
+                       g.classList.remove('grid-cols-3');
+                       g.classList.add('grid-cols-1', 'sm:grid-cols-2');
+                   });
+                }
+            });
         }
     </script>
 </body>
