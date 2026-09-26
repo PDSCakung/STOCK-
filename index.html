@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DAYA TOYOTA CAKUNG - Sistem Manajemen Stock & Delivery</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -33,83 +33,42 @@
         .slot-box:hover { transform: scale(1.05); cursor: pointer; }
         
         /* 
-           OPTIMISASI CETAK MULTI-PAGE & ANTI-BLANK:
-           Menggunakan teknik isolasi elemen #print-mount
+           OPTIMISASI CETAK MULTI-PAGE & ANTI-BLANK[cite: 13]
         */
         @media print {
-            @page { 
-                size: a4 portrait; 
-                margin: 5mm; 
-            }
-            
-            body.printing > *:not(#print-mount) {
-                display: none !important;
-            }
-            
+            @page { size: a4 portrait; margin: 5mm; }
+            body.printing > *:not(#print-mount) { display: none !important; }
             #print-mount {
-                display: block !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: #ffffff !important;
-                /* Pengaturan skala zoom-out opsional untuk memastikan A4 muat */
-                transform: scale(0.98); 
-                transform-origin: top left;
+                display: block !important; width: 100% !important; margin: 0 !important;
+                padding: 0 !important; background: #ffffff !important; transform: scale(0.98); transform-origin: top left;
             }
-            
             #print-mount * { color: #000000 !important; }
             .print-avoid-break { page-break-inside: avoid; }
-            
-            /* Sembunyikan elemen UI seperti tombol hapus TTD saat dicetak */
             .hide-on-print { display: none !important; } 
 
-            /* KOMPRESI KHUSUS PDI AGAR MUAT 1 HALAMAN */
-            #printable-pdi-area {
-                font-size: 8.5px !important; 
-                line-height: 1.1 !important;
-                padding: 10px !important;
-                border: none !important; 
-            }
+            #printable-pdi-area { font-size: 8.5px !important; line-height: 1.1 !important; padding: 10px !important; border: none !important; }
             #printable-pdi-area h3 { font-size: 12px !important; margin-bottom: 2px !important; }
             #printable-pdi-area h4 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; border-bottom: 1px solid #ccc !important;}
             #printable-pdi-area p { margin-bottom: 1px !important; }
-            #printable-pdi-area .mb-3, #printable-pdi-area .mb-2, #printable-pdi-area .mt-4, #printable-pdi-area .mt-6 { 
-                margin-bottom: 4px !important; 
-                margin-top: 4px !important; 
-            }
+            #printable-pdi-area .mb-3, #printable-pdi-area .mb-2, #printable-pdi-area .mt-4, #printable-pdi-area .mt-6 { margin-bottom: 4px !important; margin-top: 4px !important; }
             #printable-pdi-area .p-2 { padding: 4px !important; }
-            #printable-pdi-area .space-y-3 > :not([hidden]) ~ :not([hidden]) {
-                margin-top: 4px !important; 
-            }
-            #printable-pdi-area input[type=checkbox] {
-                transform: scale(0.8);
-                margin: 0 !important;
-            }
-            /* Hilangkan border canvas saat di print agar natural */
+            #printable-pdi-area .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 4px !important; }
+            #printable-pdi-area input[type=checkbox] { transform: scale(0.8); margin: 0 !important; }
             canvas.ttd-canvas { border: none !important; background: transparent !important; }
-            
-            /* Paksa 3 Kolom untuk print Checksheet */
-            .pdi-grid-print {
-                display: grid !important;
-                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-                gap: 8px !important;
-            }
+            .pdi-grid-print { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
         }
 
-        /* Styling area kanvas tanda tangan (Touch Support) */
-        .ttd-canvas { 
-            touch-action: none; 
-            background-color: #fff; 
-            border: 1px dashed #cbd5e1; 
-            border-radius: 0.375rem; 
-            cursor: crosshair; 
-        }
+        .ttd-canvas { touch-action: none; background-color: #fff; border: 1px dashed #cbd5e1; border-radius: 0.375rem; cursor: crosshair; }
+        
+        /* Hilangkan Scrollbar di Bottom Nav agar rapi */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="text-gray-800 antialiased flex flex-col min-h-screen">
+<body class="text-gray-800 antialiased flex flex-col min-h-screen pb-20 sm:pb-0">
 
     <!-- TOP HEADER -->
-    <header class="bg-toyota-dark text-white shadow-lg sticky top-0 z-50">
+    <header class="bg-toyota-dark text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
             <div class="flex items-center space-x-3">
                 <div class="bg-toyota-red text-white font-bold p-2 rounded-lg text-lg tracking-wider">TOYOTA</div>
@@ -123,17 +82,14 @@
                 <span id="api-status-dot" class="w-2 h-2 rounded-full bg-yellow-400"></span>
                 <span id="api-status-text" class="text-gray-300">Menghubungkan API...</span>
             </div>
-
-            <button onclick="toggleMobileMenu()" class="sm:hidden text-gray-300 hover:text-white focus:outline-none">
-                <i class="fa-solid fa-bars text-xl"></i>
-            </button>
+            <!-- Tombol Hamburger Mobile Dihapus (Diganti Navigasi Bawah) -->
         </div>
 
         <div class="bg-gray-900 border-t border-gray-800 px-4 py-2 text-xs text-gray-300 flex flex-wrap items-center justify-end gap-2">
-            <!-- INPUT API URL DISEMBUNYIKAN (HIDDEN) AGAR TAMPILAN LEBIH RAPI -->
+            <!-- INPUT API URL DISEMBUNYIKAN -->
             <div class="hidden items-center space-x-2 w-full sm:w-auto">
                 <span class="font-semibold text-toyota-red"><i class="fa-solid fa-plug mr-1"></i> Apps Script Web App URL:</span>
-                <input type="text" id="appscript-url" placeholder="https://script.google.com/macros/s/.../exec" class="bg-gray-800 border border-gray-700 text-white px-2 py-1 rounded w-full sm:w-96 text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
+                <input type="text" id="appscript-url" class="bg-gray-800 border border-gray-700 text-white px-2 py-1 rounded w-full sm:w-96 text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
                 <button onclick="saveApiUrl()" class="bg-toyota-red hover:bg-red-700 text-white px-3 py-1 rounded font-semibold text-xs">Simpan</button>
             </div>
             <div class="hidden items-center space-x-2 w-full sm:w-auto">
@@ -142,10 +98,10 @@
         </div>
     </header>
 
-    <!-- NAVIGATION BAR -->
-    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-28 sm:top-16 z-40">
-        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-            <div id="nav-links" class="hidden sm:flex space-x-1 sm:space-x-2 py-2 overflow-x-auto text-xs sm:text-sm font-medium">
+    <!-- NAVIGATION BAR (DESKTOP SAJA) -->
+    <nav class="hidden sm:block bg-white border-b border-gray-200 shadow-sm sticky top-16 z-30">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex space-x-2 py-2 text-sm font-medium">
                 <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn bg-toyota-red text-white px-3 py-2 rounded-md transition"><i class="fa-solid fa-chart-line mr-1"></i> Dashboard</button>
                 <button onclick="switchTab('bulkupload')" id="nav-bulkupload" class="nav-btn text-gray-600 hover:text-toyota-red px-3 py-2 rounded-md transition"><i class="fa-solid fa-file-excel mr-1"></i> Bulk Upload</button>
                 <button onclick="switchTab('mapyard')" id="nav-mapyard" class="nav-btn text-gray-600 hover:text-toyota-red px-3 py-2 rounded-md transition"><i class="fa-solid fa-warehouse mr-1"></i> Map Yard (190 Slot)</button>
@@ -156,15 +112,35 @@
                 <button onclick="switchTab('unitkeluar')" id="nav-unitkeluar" class="nav-btn text-gray-600 hover:text-toyota-red px-3 py-2 rounded-md transition"><i class="fa-solid fa-truck-ramp-box mr-1"></i> Unit Keluar</button>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden sm:hidden bg-white border-b border-gray-200 px-4 pt-2 pb-3 space-y-1 text-sm font-medium">
-            <button onclick="switchTab('dashboard'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-chart-line mr-2"></i> Dashboard</button>
-            <button onclick="switchTab('bulkupload'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-file-excel mr-2"></i> Bulk Upload</button>
-            <button onclick="switchTab('mapyard'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-warehouse mr-2"></i> Map Yard (190 Slot)</button>
-            <button onclick="switchTab('checksheet'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-clipboard-check mr-2"></i> Checksheet PDI</button>
-            <button onclick="switchTab('pdidecision'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-brain mr-2"></i> PDI Decision v2.1</button>
-            <button onclick="switchTab('stockopname'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-qrcode mr-2"></i> Stock Opname QR</button>
-            <button onclick="switchTab('orderkirim'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-print mr-2"></i> Order Kirim</button>
-            <button onclick="switchTab('unitkeluar'); toggleMobileMenu();" class="block w-full text-left py-2 px-3 rounded text-gray-700 hover:bg-gray-100"><i class="fa-solid fa-truck-ramp-box mr-2"></i> Unit Keluar</button>
+    </nav>
+
+    <!-- NAVIGATION BAR BAWAH (MOBILE SAJA - BERJEJER HORIZONTAL) -->
+    <nav class="sm:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50 overflow-x-auto no-scrollbar">
+        <div class="flex flex-nowrap items-center justify-start space-x-2 px-2 py-2 text-[10px] font-bold min-w-max">
+            <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-toyota-red transition">
+                <i class="fa-solid fa-chart-line text-lg mb-1"></i><span>Dash</span>
+            </button>
+            <button onclick="switchTab('bulkupload')" id="mob-nav-bulkupload" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-file-excel text-lg mb-1"></i><span>Upload</span>
+            </button>
+            <button onclick="switchTab('mapyard')" id="mob-nav-mapyard" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-warehouse text-lg mb-1"></i><span>Yard</span>
+            </button>
+            <button onclick="switchTab('checksheet')" id="mob-nav-checksheet" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-clipboard-check text-lg mb-1"></i><span>PDI</span>
+            </button>
+            <button onclick="switchTab('pdidecision')" id="mob-nav-pdidecision" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-brain text-lg mb-1"></i><span>Decision</span>
+            </button>
+            <button onclick="switchTab('stockopname')" id="mob-nav-stockopname" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-qrcode text-lg mb-1"></i><span>Opname</span>
+            </button>
+            <button onclick="switchTab('orderkirim')" id="mob-nav-orderkirim" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-print text-lg mb-1"></i><span>OKK</span>
+            </button>
+            <button onclick="switchTab('unitkeluar')" id="mob-nav-unitkeluar" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-gray-400 hover:text-toyota-red transition">
+                <i class="fa-solid fa-truck-ramp-box text-lg mb-1"></i><span>Keluar</span>
+            </button>
         </div>
     </nav>
 
@@ -755,9 +731,10 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="space-y-4">
+                        <!-- PERBAIKAN TAMPILAN KAMERA QR -->
                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
                             <h3 class="font-bold text-xs uppercase text-gray-700">1. Mode Scan Kamera / QR Reader</h3>
-                            <div id="qr-reader" class="w-full rounded-lg overflow-hidden border"></div>
+                            <div id="qr-reader" style="width: 100%; min-height: 250px;" class="rounded-lg overflow-hidden border border-gray-300 bg-white"></div>
                             <button onclick="startQrScanner()" class="w-full bg-gray-800 hover:bg-black text-white py-2 rounded text-xs font-bold">
                                 <i class="fa-solid fa-camera mr-1"></i> Aktifkan Kamera Scanner
                             </button>
@@ -981,7 +958,7 @@
     <!-- CONTAINER KHUSUS UNTUK PROSES CETAK -->
     <div id="print-mount" style="display: none;"></div>
 
-    <footer class="bg-white border-t border-gray-200 mt-auto py-4 text-center text-xs text-gray-500">
+    <footer class="bg-white border-t border-gray-200 mt-auto py-4 text-center text-xs text-gray-500 pb-20 sm:pb-4">
         <p>&copy; 2026 Daya Toyota Cakung. Pre-Delivery Service (PDS) & Delivery Management System.</p>
     </footer>
 
@@ -1013,7 +990,7 @@
         });
 
         // ==========================================
-        // INISIALISASI KANVAS TANDA TANGAN (Touch Support)
+        // INISIALISASI KANVAS TANDA TANGAN
         // ==========================================
         function initSignaturePad(canvasId) {
             var canvas = document.getElementById(canvasId);
@@ -1133,15 +1110,31 @@
                 .catch(err => console.error("Gagal memuat yard map:", err));
         }
 
+        // ==========================================
+        // PERUBAHAN NAVIGASI BAWAH
+        // ==========================================
         function switchTab(tabId) {
+            // Sembunyikan semua tab content
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             
+            // Ubah style tombol Desktop
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.className = 'nav-btn text-gray-600 hover:text-toyota-red px-3 py-2 rounded-md transition';
             });
             var activeBtn = document.getElementById('nav-' + tabId);
             if (activeBtn) activeBtn.className = 'nav-btn bg-toyota-red text-white px-3 py-2 rounded-md transition';
+
+            // Ubah style tombol Mobile (Bottom Nav)
+            document.querySelectorAll('.nav-mob-btn').forEach(btn => {
+                btn.classList.remove('text-toyota-red');
+                btn.classList.add('text-gray-400');
+            });
+            var activeMobBtn = document.getElementById('mob-nav-' + tabId);
+            if (activeMobBtn) {
+                activeMobBtn.classList.remove('text-gray-400');
+                activeMobBtn.classList.add('text-toyota-red');
+            }
 
             if (tabId === 'orderkirim') {
                 fetchOkkNumber();
@@ -1149,11 +1142,6 @@
                 updatePdiDecisionPreview();
                 loadPdiDecisionHistory();
             }
-        }
-
-        function toggleMobileMenu() {
-            var menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
         }
 
         function renderStockTable(list) {
@@ -1315,9 +1303,6 @@
             });
         }
 
-        // ==========================================
-        // CHECKSHEET PDI: FETCH & LOAD HISTORY
-        // ==========================================
         function fetchPdiUnitData() {
             var vin = document.getElementById("pdi-vin-input").value.trim();
             if (!vin) { alert("Masukkan No. Rangka terlebih dahulu!"); return; }
@@ -1334,11 +1319,9 @@
                         document.getElementById("pdi-warna").innerText = res.data.warna || "-";
                         document.getElementById("pdi-tglmasuk").innerText = res.data.tanggalMasuk || "-";
 
-                        // Load Riwayat PDI (Checkbox dan Tanda Tangan Base64)
                         if (res.data.pdiHistory) {
                             try {
                                 var riwayat = JSON.parse(res.data.pdiHistory);
-                                
                                 document.getElementById("pdi-keterangan").value = riwayat.catatan || "";
                                 
                                 if (riwayat.checkboxes && riwayat.checkboxes.length > 0) {
@@ -1384,9 +1367,6 @@
                 });
         }
 
-        // ==========================================
-        // CHECKSHEET PDI: SAVE CENTANG & TTD
-        // ==========================================
         function savePdiChecksheet() {
             var vin = document.getElementById("pdi-vin").innerText;
             if (!vin || vin === "-" || vin === "Mencari...") { alert("Tarik data unit terlebih dahulu!"); return; }
@@ -1407,31 +1387,18 @@
             var signPdsData = isCanvasBlank(canvasPds) ? "" : canvasPds.toDataURL();
             var signSalesData = isCanvasBlank(canvasSales) ? "" : canvasSales.toDataURL();
 
-            var historyData = {
-                catatan: document.getElementById("pdi-keterangan").value,
-                checkboxes: cbStates,
-                signPds: signPdsData,
-                signSales: signSalesData
-            };
+            var historyData = { catatan: document.getElementById("pdi-keterangan").value, checkboxes: cbStates, signPds: signPdsData, signSales: signSalesData };
 
             var payload = {
-                action: "saveChecksheetPdi",
-                noRangka: vin,
-                tanggalPdi: new Date().toISOString().split('T')[0],
-                statusPdi: "PASSED",
-                pdiHistoryString: JSON.stringify(historyData)
+                action: "saveChecksheetPdi", noRangka: vin, tanggalPdi: new Date().toISOString().split('T')[0], statusPdi: "PASSED", pdiHistoryString: JSON.stringify(historyData)
             };
 
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            })
+            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(res => alert(res.message))
             .catch(err => alert("Gagal menyimpan Checksheet PDI."));
         }
 
-        // --- PDI DECISION SYSTEM V2.1 LOGIC ---
         function fetchPdiDecisionUnitData() {
             var vin = document.getElementById("pdi-dec-vin-input").value.trim();
             if (!vin) { alert("Masukkan No. Rangka terlebih dahulu!"); return; }
@@ -1488,21 +1455,15 @@
             if (!pdiDecisionPhotoBase64) { alert("Upload Foto Bukti Defect wajib dilampirkan!"); return; }
 
             var payload = {
-                action: "savePdiDecision",
-                noRangka: vin,
-                tanggalInspeksi: new Date().toISOString().split('T')[0],
-                tipeDefect: document.getElementById("pdi-dec-input-tipe").value,
-                tingkatKerusakan: document.getElementById("pdi-dec-input-tingkat").value,
-                estimasiBiaya: parseFloat(document.getElementById("pdi-dec-input-biaya").value) || 0,
-                keputusanPerbaikan: keputusan
+                action: "savePdiDecision", noRangka: vin, tanggalInspeksi: new Date().toISOString().split('T')[0],
+                tipeDefect: document.getElementById("pdi-dec-input-tipe").value, tingkatKerusakan: document.getElementById("pdi-dec-input-tingkat").value,
+                estimasiBiaya: parseFloat(document.getElementById("pdi-dec-input-biaya").value) || 0, keputusanPerbaikan: keputusan
             };
 
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify(payload)
-            }).then(res => res.json()).then(res => {
-                alert(res.message); loadPdiDecisionHistory();
-            }).catch(err => alert("Gagal menyimpan data PDI Decision System."));
+            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
+            .then(res => res.json())
+            .then(res => { alert(res.message); loadPdiDecisionHistory(); })
+            .catch(err => alert("Gagal menyimpan data PDI Decision System."));
         }
 
         function loadPdiDecisionHistory() {
@@ -1532,11 +1493,25 @@
                 .catch(err => console.error("Gagal memuat riwayat:", err));
         }
 
-        // STOCK OPNAME QR SCANNER
+        // ==========================================
+        // PERBAIKAN INISIALISASI KAMERA QR SCANNER
+        // ==========================================
         function startQrScanner() {
-            if (html5QrCodeScanner) return;
-            html5QrCodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-            html5QrCodeScanner.render(onScanSuccess);
+            if (html5QrCodeScanner) {
+                html5QrCodeScanner.clear();
+            }
+            
+            // Konfigurasi agar merender dengan baik di kontainer CSS
+            html5QrCodeScanner = new Html5QrcodeScanner(
+                "qr-reader", 
+                { fps: 10, qrbox: { width: 250, height: 250 } }, 
+                false
+            );
+            
+            html5QrCodeScanner.render(onScanSuccess, function(error) {
+                // Jangan lempar alert pada error rendering biasa untuk mencegah spam, cukup log
+                console.warn("QR Scan Error: " + error);
+            });
         }
 
         function onScanSuccess(decodedText) { document.getElementById("opname-vin-input").value = decodedText; }
@@ -1597,7 +1572,6 @@
             a.click();
         }
 
-        // ORDER KIRIM KENDARAAN (OKK)
         function updateOkkPreview() {
             var custInput = document.getElementById("okk-input-customer");
             var customer = custInput ? custInput.value.trim() : "PT. PARANI ARTAMANDIRI";
@@ -1668,7 +1642,6 @@
             .catch(err => alert("Gagal menyimpan Surat Order Kirim."));
         }
 
-        // UNIT KELUAR
         function submitUnitKeluar() {
             var vin = document.getElementById("out-vin").value.trim();
             var driver = document.getElementById("out-driver").value.trim();
@@ -1693,7 +1666,6 @@
             .catch(err => alert("Gagal memproses unit keluar."));
         }
 
-        // --- FUNGSI CETAK (PRINT) DOKUMEN SUPER RAPI ---
         function printDocument(elementId) {
             var elem = document.getElementById(elementId);
             if (!elem) { alert("Area cetak tidak ditemukan!"); return; }
@@ -1723,7 +1695,6 @@
             }
         }
 
-        // --- FUNGSI DOWNLOAD / SIMPAN PDF ---
         function downloadPdf(elementId, filename, format = 'a4', orient = 'portrait') {
             var element = document.getElementById(elementId);
             if (!element) { alert("Area dokumen tidak ditemukan!"); return; }
@@ -1737,7 +1708,6 @@
                 }
             }
 
-            // Sembunyikan elemen sementara saat PDF (seperti tombol Hapus TTD)
             var hideElements = element.querySelectorAll('.hide-on-print');
             hideElements.forEach(el => el.style.display = 'none');
 
@@ -1777,7 +1747,6 @@
                        g.classList.add('grid-cols-1', 'sm:grid-cols-2');
                    });
                 }
-                // Kembalikan elemen yang disembunyikan
                 hideElements.forEach(el => el.style.display = 'block');
             });
         }
