@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- HTML5-QRCode Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- HTML2PDF Library (Untuk Simpan PDF) -->
+    <!-- HTML2PDF Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script>
@@ -32,9 +32,6 @@
         .slot-box { transition: all 0.2s ease-in-out; }
         .slot-box:hover { transform: scale(1.05); cursor: pointer; }
         
-        /* 
-           OPTIMISASI CETAK MULTI-PAGE & ANTI-BLANK[cite: 13]
-        */
         @media print {
             @page { size: a4 portrait; margin: 5mm; }
             body.printing > *:not(#print-mount) { display: none !important; }
@@ -50,17 +47,12 @@
             #printable-pdi-area h3 { font-size: 12px !important; margin-bottom: 2px !important; }
             #printable-pdi-area h4 { font-size: 9px !important; margin-bottom: 2px !important; padding-bottom: 1px !important; border-bottom: 1px solid #ccc !important;}
             #printable-pdi-area p { margin-bottom: 1px !important; }
-            #printable-pdi-area .mb-3, #printable-pdi-area .mb-2, #printable-pdi-area .mt-4, #printable-pdi-area .mt-6 { margin-bottom: 4px !important; margin-top: 4px !important; }
-            #printable-pdi-area .p-2 { padding: 4px !important; }
-            #printable-pdi-area .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: 4px !important; }
             #printable-pdi-area input[type=checkbox] { transform: scale(0.8); margin: 0 !important; }
             canvas.ttd-canvas { border: none !important; background: transparent !important; }
             .pdi-grid-print { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; }
         }
 
         .ttd-canvas { touch-action: none; background-color: #fff; border: 1px dashed #cbd5e1; border-radius: 0.375rem; cursor: crosshair; }
-        
-        /* Hilangkan Scrollbar di Bottom Nav agar rapi */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -77,16 +69,13 @@
                     <p class="text-xs text-gray-400">Pre-Delivery Service & Yard Stock System</p>
                 </div>
             </div>
-            
             <div class="hidden sm:flex items-center space-x-2 bg-gray-800 px-3 py-1 rounded-full text-xs">
                 <span id="api-status-dot" class="w-2 h-2 rounded-full bg-yellow-400"></span>
                 <span id="api-status-text" class="text-gray-300">Menghubungkan API...</span>
             </div>
-            <!-- Tombol Hamburger Mobile Dihapus (Diganti Navigasi Bawah) -->
         </div>
 
         <div class="bg-gray-900 border-t border-gray-800 px-4 py-2 text-xs text-gray-300 flex flex-wrap items-center justify-end gap-2">
-            <!-- INPUT API URL DISEMBUNYIKAN -->
             <div class="hidden items-center space-x-2 w-full sm:w-auto">
                 <span class="font-semibold text-toyota-red"><i class="fa-solid fa-plug mr-1"></i> Apps Script Web App URL:</span>
                 <input type="text" id="appscript-url" class="bg-gray-800 border border-gray-700 text-white px-2 py-1 rounded w-full sm:w-96 text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
@@ -98,7 +87,7 @@
         </div>
     </header>
 
-    <!-- NAVIGATION BAR (DESKTOP SAJA) -->
+    <!-- NAVIGATION BAR (DESKTOP) -->
     <nav class="hidden sm:block bg-white border-b border-gray-200 shadow-sm sticky top-16 z-30">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="flex space-x-2 py-2 text-sm font-medium">
@@ -114,7 +103,7 @@
         </div>
     </nav>
 
-    <!-- NAVIGATION BAR BAWAH (MOBILE SAJA - BERJEJER HORIZONTAL) -->
+    <!-- NAVIGATION BAR BAWAH (MOBILE) -->
     <nav class="sm:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-300 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-50 overflow-x-auto no-scrollbar">
         <div class="flex flex-nowrap items-center justify-start space-x-2 px-2 py-2 text-[10px] font-bold min-w-max">
             <button onclick="switchTab('dashboard')" id="mob-nav-dashboard" class="nav-mob-btn flex flex-col items-center justify-center w-16 text-toyota-red transition">
@@ -207,16 +196,15 @@
                                 <th class="p-3">No. Mesin</th>
                                 <th class="p-3">Tipe Unit</th>
                                 <th class="p-3">Warna</th>
-                                <th class="p-3">Nama Customer</th>
-                                <th class="p-3">Nama Sales</th>
-                                <th class="p-3">Tanggal Masuk</th>
+                                <th class="p-3">Customer & Sales</th>
+                                <th class="p-3">Tgl Masuk & Keluar</th>
                                 <th class="p-3">Slot Yard</th>
                                 <th class="p-3">Status / Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="stock-table-body" class="divide-y divide-gray-200">
                             <tr>
-                                <td colspan="9" class="p-4 text-center text-gray-400">Memuat data dari Google Sheets...</td>
+                                <td colspan="8" class="p-4 text-center text-gray-400">Memuat data dari Google Sheets...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -358,7 +346,7 @@
             </div>
         </section>
 
-        <!-- 4. CHECKSHEET PDI TAB (DENGAN KOMPRESI & TANDA TANGAN DIGITAL) -->
+        <!-- 4. CHECKSHEET PDI TAB -->
         <section id="tab-checksheet" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b pb-3">
@@ -425,24 +413,18 @@
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Instrument Panel (Dashboard, hazard)</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Air Conditioner (AC)</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Plafon, Lampu Plafon, Karpet, Sunvisor</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Lighter (Jika Ada)</span></label>
                                 </div>
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Pemeriksaan body kanan:</h4>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Cek Steer, Klakson</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Lampu (Head, Back, Rem, Parking, Fog)</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Lampu Indikator / Switch</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Wiper, Washer</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Pedal Rem, Rem Tangan</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Radio, Tape/ TV, Speaker</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Alarm</span></label>
                                 </div>
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Pintu & fender depan kanan:</h4>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Kaca Depan, Wiper</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Kaca Pintu, Kaca Spion Luar</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Handle & Door Panel</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Moulding Body & Fender</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
                             </div>
@@ -451,26 +433,18 @@
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Depan & ruang mesin:</h4>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Bumper, Kap Mesin</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Grill, Logo, Valance, End Panel</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Lampu Besar, Lampu Sign</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Minyak (Rem, Kopling, Pwr Steer, Oli)</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Tank (Washer & Radiator)</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Hose Fuel & Battery (Accu)</span></label>
                                 </div>
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Body kiri depan:</h4>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Kaca Depan Kiri, Wiper</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Kaca Pintu, Kaca Spion Luar</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Handle & Door Panel</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Moulding Body & Fender</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Body samping kiri:</h4>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Door Panel, Handle</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Moulding Body & Kaca samping</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Quarter Panel & Cover Fuel Tank</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Velg, Ban & Mud Guard</span></label>
                                 </div>
                             </div>
 
@@ -478,23 +452,18 @@
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Belakang:</h4>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Lampu (Kombinasi, Plat, Mundur)</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Handle, Wiper/Washer</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Truck Panel (Bagasi, Emblem)</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Bumper, Ban Serep & *Cover</span></label>
                                 </div>
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Body kanan samping:</h4>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Quarter Panel, Door Panel, Handle</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Moulding Body & Kaca Samping</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Quarter Panel, Door Panel</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Velg, Ban, Mud Guard</span></label>
                                 </div>
                                 <div class="print-avoid-break">
                                     <h4 class="font-bold border-b border-gray-300 pb-0.5 mb-1 text-gray-700">Kolong kendaraan & Alat:</h4>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Tekanan angin ban</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Mur/Baut Chassis & Kondisi kolong</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Bebas Kebocoran oli/fluida</span></label>
                                     <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Dokumen (Servis, Manual)</span></label>
-                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Tool set, Dongkrak, Stang, Dop roda</span></label>
+                                    <label class="flex items-start space-x-1"><input type="checkbox" checked class="chk-pdi mt-0.5"> <span>Tool set, Dongkrak, Stang</span></label>
                                 </div>
                             </div>
                         </div>
@@ -610,7 +579,7 @@
                         <div>
                             <h2 class="font-extrabold text-base tracking-wide text-gray-900">PT DAYA ADICIPTA SANDIKA</h2>
                             <p class="font-bold text-xs text-gray-700">DAYA TOYOTA CAKUNG - PRE-DELIVERY SERVICE</p>
-                            <p class="text-[10px] text-gray-500">FORM KEPUTUSAN PENANGANAN DEFECT UNIT (PDI DECISION SYSTEM v2.1)</p>
+                            <p class="text-[10px] text-gray-500">FORM KEPUTUSAN PENANGANAN DEFECT UNIT</p>
                         </div>
                         <div class="text-right text-[10px] text-gray-600">
                             <p>No. Dokumen: <b>FM-LOG-002</b></p>
@@ -731,7 +700,6 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="space-y-4">
-                        <!-- PERBAIKAN TAMPILAN KAMERA QR -->
                         <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 space-y-3">
                             <h3 class="font-bold text-xs uppercase text-gray-700">1. Mode Scan Kamera / QR Reader</h3>
                             <div id="qr-reader" style="width: 100%; min-height: 250px;" class="rounded-lg overflow-hidden border border-gray-300 bg-white"></div>
@@ -939,14 +907,15 @@
                         <input type="text" id="out-vin" placeholder="Scan atau Ketik No. Rangka..." class="w-full p-2 border border-gray-300 rounded-lg text-xs font-mono focus:ring-1 focus:ring-toyota-red focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Nama Driver / Ekspedisi:</label>
-                        <input type="text" id="out-driver" placeholder="Nama Supir..." class="w-full p-2 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Nama Driver:</label>
+                        <select id="out-driver" class="w-full p-2 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
+                            <option value="">-- Pilih Driver --</option>
+                            <option value="Adang Kosasih">Adang Kosasih</option>
+                            <option value="M Annur">M Annur</option>
+                            <option value="Uus">Uus</option>
+                        </select>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">No. Surat Order Kirim (OKK):</label>
-                        <input type="text" id="out-okk" placeholder="Contoh: DAS/OKK/20260918/0001" class="w-full p-2 border border-gray-300 rounded-lg text-xs focus:ring-1 focus:ring-toyota-red focus:outline-none">
-                    </div>
-                    <button onclick="submitUnitKeluar()" class="w-full bg-toyota-red hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm">
+                    <button onclick="submitUnitKeluar()" class="w-full bg-toyota-red hover:bg-red-700 text-white font-bold py-2.5 rounded-lg text-xs transition shadow-sm mt-2">
                         <i class="fa-solid fa-check-double mr-1"></i> Diproses KELUAR & Bebaskan Slot Yard
                     </button>
                 </div>
@@ -1110,22 +1079,16 @@
                 .catch(err => console.error("Gagal memuat yard map:", err));
         }
 
-        // ==========================================
-        // PERUBAHAN NAVIGASI BAWAH
-        // ==========================================
         function switchTab(tabId) {
-            // Sembunyikan semua tab content
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             
-            // Ubah style tombol Desktop
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.className = 'nav-btn text-gray-600 hover:text-toyota-red px-3 py-2 rounded-md transition';
             });
             var activeBtn = document.getElementById('nav-' + tabId);
             if (activeBtn) activeBtn.className = 'nav-btn bg-toyota-red text-white px-3 py-2 rounded-md transition';
 
-            // Ubah style tombol Mobile (Bottom Nav)
             document.querySelectorAll('.nav-mob-btn').forEach(btn => {
                 btn.classList.remove('text-toyota-red');
                 btn.classList.add('text-gray-400');
@@ -1144,29 +1107,45 @@
             }
         }
 
+        // ==========================================
+        // RENDER TABEL (Dengan Nama Driver & Tgl Keluar)
+        // ==========================================
         function renderStockTable(list) {
             var tbody = document.getElementById("stock-table-body");
             tbody.innerHTML = "";
             if (!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="p-4 text-center text-gray-400">Belum ada data stock unit.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-gray-400">Belum ada data stock unit.</td></tr>';
                 return;
             }
             list.forEach(item => {
                 var tr = document.createElement("tr");
-                tr.className = "hover:bg-gray-50";
+                tr.className = "hover:bg-gray-50 border-b";
+                
+                var outHtml = "";
+                if (item.tanggalKeluar && item.tanggalKeluar !== "-") {
+                    outHtml = `
+                    <div class="text-red-600 font-bold mt-1" title="Tanggal Keluar"><i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> ${item.tanggalKeluar}</div>
+                    <div class="text-gray-600 mt-0.5" title="Driver Keluar"><i class="fa-solid fa-id-card mr-1"></i> ${item.namaDriver || '-'}</div>`;
+                }
+
                 tr.innerHTML = `
                     <td class="p-3 font-mono font-bold text-gray-900">${item.noRangka}</td>
                     <td class="p-3 font-mono text-xs">${item.noMesin || '-'}</td>
-                    <td class="p-3 font-semibold">${item.tipeUnit}</td>
+                    <td class="p-3 font-semibold text-xs">${item.tipeUnit}</td>
                     <td class="p-3 text-xs">${item.warna || '-'}</td>
-                    <td class="p-3 text-xs">${item.namaCustomer || '-'}</td>
-                    <td class="p-3 text-xs">${item.namaSales || '-'}</td>
-                    <td class="p-3 text-xs font-semibold text-blue-600">${item.tanggalMasuk || '-'}</td>
+                    <td class="p-3 text-xs leading-relaxed">
+                        <div><i class="fa-solid fa-user text-gray-400 mr-1" title="Customer"></i> ${item.namaCustomer || '-'}</div>
+                        <div class="text-gray-500 mt-0.5"><i class="fa-solid fa-user-tie text-gray-400 mr-1" title="Sales"></i> ${item.namaSales || '-'}</div>
+                    </td>
+                    <td class="p-3 text-[11px]">
+                        <div class="text-blue-600 font-bold" title="Tanggal Masuk"><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i> ${item.tanggalMasuk || '-'}</div>
+                        ${outHtml}
+                    </td>
                     <td class="p-3"><span class="bg-gray-200 text-gray-800 text-[10px] px-2 py-1 rounded font-bold">${item.slotYard || 'Unassigned'}</span></td>
-                    <td class="p-3 flex items-center space-x-2">
-                        <span class="${item.status && item.status.includes('Keluar') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} text-[10px] px-2 py-1 rounded font-bold">${item.status}</span>
-                        <button onclick="openEditModal('${item.noRangka}', '${item.tanggalMasuk}', '${item.slotYard}')" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded text-[10px] font-bold transition">
-                            <i class="fa-solid fa-pen-to-square"></i>
+                    <td class="p-3 flex flex-col items-start space-y-1">
+                        <span class="${item.status && item.status.includes('Keluar') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'} text-[10px] px-2 py-1 rounded font-bold w-full text-center">${item.status}</span>
+                        <button onclick="openEditModal('${item.noRangka}', '${item.tanggalMasuk}', '${item.slotYard}')" class="bg-gray-800 hover:bg-black text-white px-2 py-1 rounded text-[10px] font-bold transition w-full">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
                         </button>
                     </td>
                 `;
@@ -1493,15 +1472,11 @@
                 .catch(err => console.error("Gagal memuat riwayat:", err));
         }
 
-        // ==========================================
-        // PERBAIKAN INISIALISASI KAMERA QR SCANNER
-        // ==========================================
         function startQrScanner() {
             if (html5QrCodeScanner) {
                 html5QrCodeScanner.clear();
             }
             
-            // Konfigurasi agar merender dengan baik di kontainer CSS
             html5QrCodeScanner = new Html5QrcodeScanner(
                 "qr-reader", 
                 { fps: 10, qrbox: { width: 250, height: 250 } }, 
@@ -1509,7 +1484,6 @@
             );
             
             html5QrCodeScanner.render(onScanSuccess, function(error) {
-                // Jangan lempar alert pada error rendering biasa untuk mencegah spam, cukup log
                 console.warn("QR Scan Error: " + error);
             });
         }
@@ -1642,23 +1616,25 @@
             .catch(err => alert("Gagal menyimpan Surat Order Kirim."));
         }
 
+        // ==========================================
+        // PROSES UNIT KELUAR 
+        // ==========================================
         function submitUnitKeluar() {
             var vin = document.getElementById("out-vin").value.trim();
-            var driver = document.getElementById("out-driver").value.trim();
-            var okk = document.getElementById("out-okk").value.trim();
+            var driver = document.getElementById("out-driver").value; // Select Dropdown
 
             if (!vin) { alert("Masukkan No. Rangka!"); return; }
+            if (!driver) { alert("Silakan pilih Nama Driver terlebih dahulu!"); return; }
 
             fetch(API_URL, {
                 method: "POST",
-                body: JSON.stringify({ action: "processUnitKeluar", noRangka: vin, driver: driver, noOkk: okk })
+                body: JSON.stringify({ action: "processUnitKeluar", noRangka: vin, driver: driver })
             })
             .then(res => res.json())
             .then(res => {
                 alert(res.message);
                 document.getElementById("out-vin").value = "";
                 document.getElementById("out-driver").value = "";
-                document.getElementById("out-okk").value = "";
                 loadAllStockFromApi();
                 loadYardMapFromApi();
                 switchTab("dashboard");
