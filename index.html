@@ -553,6 +553,7 @@
                             <option value="Asuransi">Asuransi</option>
                             <option value="Body Repair Internal">Body Repair Internal</option>
                         </select>
+                        <p id="pdi-dec-auto-note" class="text-[10px] mt-1 text-gray-500"></p>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Estimasi Biaya Perbaikan (Rp):</label>
@@ -1437,12 +1438,27 @@
             reader.readAsDataURL(file);
         }
 
+        function tentukanKeputusanOtomatis(biaya, sla, tingkat) {
+            // Aturan 1: Biaya < 1 juta, sisa hari SLA < 5, kerusakan Ringan -> Body Repair Internal
+            if (biaya < 1000000 && sla < 5 && tingkat === "Ringan") return "Body Repair Internal";
+            // Aturan 2: Biaya > 1 juta, sisa hari SLA > 5, kerusakan Ringan atau Berat -> Asuransi
+            // Selain Aturan 1 (termasuk Aturan 2 dan kombinasi lain) -> Asuransi
+            return "Asuransi";
+        }
+
         function updatePdiDecisionPreview() {
             var tipe = document.getElementById("pdi-dec-input-tipe").value;
             var tingkat = document.getElementById("pdi-dec-input-tingkat").value;
             var biaya = parseFloat(document.getElementById("pdi-dec-input-biaya").value) || 0;
             var sla = parseInt(document.getElementById("pdi-dec-input-sla").value) || 0;
-            var keputusan = document.getElementById("pdi-dec-input-keputusan").value || "- Belum Dipilih -";
+            var selKeputusan = document.getElementById("pdi-dec-input-keputusan");
+            var noteKeputusan = document.getElementById("pdi-dec-auto-note");
+            var keputusanOtomatis = tentukanKeputusanOtomatis(biaya, sla, tingkat);
+            selKeputusan.value = keputusanOtomatis;
+            selKeputusan.disabled = true;
+            noteKeputusan.innerText = "Keputusan ditentukan otomatis oleh sistem sesuai aturan biaya, SLA, dan tingkat kerusakan.";
+            noteKeputusan.className = "text-[10px] mt-1 text-green-700 font-semibold";
+            var keputusan = selKeputusan.value || "- Belum Dipilih -";
             var catatan = document.getElementById("pdi-dec-input-catatan").value || "-";
 
             document.getElementById("pdi-dec-disp-tipe").innerText = tipe;
