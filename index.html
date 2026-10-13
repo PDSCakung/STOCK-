@@ -1439,8 +1439,8 @@
         }
 
         function tentukanKeputusanOtomatis(biaya, sla, tingkat) {
-            // Aturan 1: Biaya < 1 juta, sisa hari SLA < 5, kerusakan Ringan -> Body Repair Internal
-            if (biaya < 1000000 && sla < 5 && tingkat === "Ringan") return "Body Repair Internal";
+            // Aturan 1: Biaya < 1 juta, sisa hari SLA < 5, kerusakan Ringan atau Sedang -> Body Repair Internal
+            if (biaya < 1000000 && sla < 5 && (tingkat === "Ringan" || tingkat === "Sedang")) return "Body Repair Internal";
             // Aturan 2: Biaya > 1 juta, sisa hari SLA > 5, kerusakan Ringan atau Berat -> Asuransi
             // Selain Aturan 1 (termasuk Aturan 2 dan kombinasi lain) -> Asuransi
             return "Asuransi";
